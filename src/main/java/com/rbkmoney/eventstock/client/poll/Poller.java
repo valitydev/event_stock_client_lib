@@ -45,7 +45,7 @@ class Poller {
 
                     @Override
                     public Thread newThread(Runnable r) {
-                        Thread t =  new Thread(threadGroup, r, "T" + counter.toString());
+                        Thread t =  new Thread(threadGroup, r, "T" + counter.incrementAndGet());
                         t.setDaemon(true);
                         return t;
                     }
