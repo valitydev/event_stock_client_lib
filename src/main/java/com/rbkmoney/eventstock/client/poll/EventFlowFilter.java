@@ -10,7 +10,7 @@ import java.time.Instant;
 /**
  * Created by vpankrashkin on 28.06.16.
  */
-class EventFlowFilter implements EventFilter<StockEvent> {
+public class EventFlowFilter implements EventFilter<StockEvent> {
     private final EventConstraint eventConstraint;
     private final Filter filter;
     private final int limit;
