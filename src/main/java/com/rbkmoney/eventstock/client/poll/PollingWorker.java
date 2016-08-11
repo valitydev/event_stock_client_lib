@@ -178,7 +178,7 @@ class PollingWorker implements Runnable {
                 }
             } else {
                 T val = valExtractor.apply(event);
-                range.setFromValue(val);
+                range.setFromInclusive(val);
                 rangeWalker = walkerCreator.apply(range);
             }
         }
