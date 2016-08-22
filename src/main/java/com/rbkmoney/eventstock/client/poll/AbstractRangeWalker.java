@@ -1,7 +1,6 @@
 package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.eventstock.client.EventRange;
-import javafx.util.Pair;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -49,4 +48,12 @@ abstract  class AbstractRangeWalker<T extends Comparable> implements RangeWalker
     }
 
     protected abstract EventRange<T> createRange(T fromBound, boolean fromInclusive, T toBound, boolean toInclusive, EventRange<T> initialRange);
+
+    @Override
+    public String toString() {
+        return "AbstractRangeWalker{" +
+                "range=" + range +
+                ", walkingRange=" + walkingRange +
+                '}';
+    }
 }

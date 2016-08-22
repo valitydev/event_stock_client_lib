@@ -4,6 +4,7 @@ import com.rbkmoney.damsel.event_stock.*;
 import com.rbkmoney.damsel.event_stock.EventConstraint;
 import com.rbkmoney.damsel.event_stock.EventRange;
 import com.rbkmoney.damsel.payment_processing.NoLastEvent;
+import com.rbkmoney.thrift.filter.converter.TemporalConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,11 +23,12 @@ class ESServiceAdapter implements ServiceAdapter<StockEvent, com.rbkmoney.events
 
     @Override
     public Collection<StockEvent> getEventRange(com.rbkmoney.eventstock.client.EventConstraint srcConstraint, int limit) throws ServiceException {
-        log.trace("New event range request: {}, limit: {}", srcConstraint, limit);
         EventConstraint resConstraint = convertConstraint(srcConstraint, limit);
+        log.debug("New event range request: {}, limit: {}", resConstraint, limit);
         try {
             Collection<StockEvent> events = repository.getEvents(resConstraint);
-            log.trace("Received events: {}", events.size());
+            log.debug("Received events count: {}", events.size());
+            log.trace("Received events: {}", events);
             return events;
         } catch (Exception e) {
             throw new ServiceException(e);
@@ -36,7 +38,10 @@ class ESServiceAdapter implements ServiceAdapter<StockEvent, com.rbkmoney.events
     @Override
     public StockEvent getFirstEvent() throws ServiceException {
         try {
-            return repository.getFirstEvent();
+            log.debug("New first event request");
+            StockEvent stockEvent = repository.getFirstEvent();
+            log.debug("Received event: {}", stockEvent);
+            return stockEvent;
         } catch (NoLastEvent e) {
             return null;
         } catch (Exception e) {
@@ -47,7 +52,10 @@ class ESServiceAdapter implements ServiceAdapter<StockEvent, com.rbkmoney.events
     @Override
     public StockEvent getLastEvent() throws ServiceException {
         try {
-            return repository.getLastEvent();
+            log.debug("New last event request");
+            StockEvent stockEvent = repository.getLastEvent();
+            log.debug("Received event: {}", stockEvent);
+            return stockEvent;
         } catch (NoLastEvent e) {
             return null;
         } catch (Exception e) {

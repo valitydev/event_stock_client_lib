@@ -3,7 +3,7 @@ package com.rbkmoney.eventstock.client.poll;
 import com.rbkmoney.damsel.event_stock.SourceEvent;
 import com.rbkmoney.damsel.event_stock.StockEvent;
 import com.rbkmoney.damsel.payment_processing.Event;
-import com.rbkmoney.eventstock.client.poll.TemporalConverter;
+import com.rbkmoney.thrift.filter.converter.TemporalConverter;
 
 import java.time.temporal.TemporalAccessor;
 import java.util.Optional;

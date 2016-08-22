@@ -1,5 +1,6 @@
 package com.rbkmoney.eventstock.client.poll;
 
+import com.rbkmoney.thrift.filter.converter.TemporalConverter;
 import org.junit.Test;
 
 import java.time.Instant;

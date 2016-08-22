@@ -1,6 +1,8 @@
 package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.eventstock.client.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -8,6 +10,8 @@ import java.util.UUID;
  * Created by vpankrashkin on 28.06.16.
  */
 class PollingEventPublisher<TEvent> implements EventPublisher<TEvent> {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     private final PollingConfig defaultConfig;
     private final Poller poller;
 
@@ -26,14 +30,16 @@ class PollingEventPublisher<TEvent> implements EventPublisher<TEvent> {
         }
 
         PollingConfig resultConfig = PollingConfig.mergeConfig(mainConfig, defaultConfig);
-
+        log.trace("Merged PollingConfig: {}", resultConfig);
         do {
             String subsKey = UUID.randomUUID().toString();
             if (poller.addPolling(subsKey, resultConfig)) {
+                log.debug("Successfully subscribed: {}", subsKey);
                 return subsKey;
             }
         } while (!Thread.currentThread().isInterrupted());
-        throw new IllegalStateException("Thread interrupted");
+        log.warn("Subscription interrupted, no subscription key generated");
+        return null;
     }
 
     @Override

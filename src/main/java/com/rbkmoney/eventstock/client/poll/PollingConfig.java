@@ -14,6 +14,14 @@ class PollingConfig<TEvent> implements SubscriberConfig<TEvent>{
     private final ErrorHandler errorHandler;
     private final int maxQuerySize;
 
+    public static <TEvent> PollingConfig<TEvent> mergeConfig(PollingConfig<TEvent> mainConfig, PollingConfig<TEvent> defaultConfig) {
+        EventFilter<TEvent> eventFilter = mainConfig.getEventFilter() != null ? mainConfig.getEventFilter() : defaultConfig.getEventFilter();
+        EventHandler<TEvent> eventHandler = mainConfig.getEventHandler() != null ? mainConfig.getEventHandler() : defaultConfig.getEventHandler();
+        ErrorHandler errorHandler = mainConfig.getErrorHandler() != null ? mainConfig.getErrorHandler() : defaultConfig.getErrorHandler();
+        int maxQuerySize = mainConfig.getMaxQuerySize() > 0 ? mainConfig.getMaxQuerySize() : defaultConfig.getMaxQuerySize();
+        return new PollingConfig<>(eventFilter, eventHandler, errorHandler, maxQuerySize, true);
+    }
+
     public PollingConfig(EventHandler<TEvent> eventHandler, ErrorHandler errorHandler, int maxQuerySize) {
         this.eventFilter = null;
         this.eventHandler = eventHandler;
@@ -64,11 +72,13 @@ class PollingConfig<TEvent> implements SubscriberConfig<TEvent>{
         return maxQuerySize;
     }
 
-    public static <TEvent> PollingConfig<TEvent> mergeConfig(PollingConfig<TEvent> mainConfig, PollingConfig<TEvent> defaultConfig) {
-        EventFilter<TEvent> eventFilter = mainConfig.getEventFilter() != null ? mainConfig.getEventFilter() : defaultConfig.getEventFilter();
-        EventHandler<TEvent> eventHandler = mainConfig.getEventHandler() != null ? mainConfig.getEventHandler() : defaultConfig.getEventHandler();
-        ErrorHandler errorHandler = mainConfig.getErrorHandler() != null ? mainConfig.getErrorHandler() : defaultConfig.getErrorHandler();
-        int maxQuerySize = mainConfig.getMaxQuerySize() > 0 ? mainConfig.getMaxQuerySize() : defaultConfig.getMaxQuerySize();
-        return new PollingConfig<>(eventFilter, eventHandler, errorHandler, maxQuerySize, true);
+    @Override
+    public String toString() {
+        return "PollingConfig{" +
+                "eventFilter=" + eventFilter +
+                ", eventHandler=" + eventHandler +
+                ", errorHandler=" + errorHandler +
+                ", maxQuerySize=" + maxQuerySize +
+                '}';
     }
 }

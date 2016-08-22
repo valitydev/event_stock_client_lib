@@ -1,7 +1,6 @@
 package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.eventstock.client.EventRange;
-import javafx.util.Pair;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

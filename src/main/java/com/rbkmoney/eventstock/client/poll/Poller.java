@@ -3,7 +3,6 @@ package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.damsel.event_stock.StockEvent;
 import com.rbkmoney.eventstock.client.EventConstraint;
-import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +130,7 @@ class Poller {
 
     void destroy() {
         if (running.compareAndSet(true, false)) {
-            log.debug("Shutdown poller...");
+            log.info("Shutdown poller...");
             lock.lock();
             try {
                 directRemoveAll();
@@ -149,7 +148,7 @@ class Poller {
                 log.warn("Waiting for poller shutdown is interrupted.");
             }
         } else {
-            log.debug("Poller is already marked as destroyed.");
+            log.warn("Poller is already marked as destroyed.");
         }
     }
 

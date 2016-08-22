@@ -6,11 +6,18 @@ import com.rbkmoney.damsel.event_stock.EventConstraint;
 import com.rbkmoney.damsel.event_stock.EventRange;
 import com.rbkmoney.eventstock.client.*;
 import com.rbkmoney.damsel.base.InvalidRequest;
+import com.rbkmoney.damsel.domain.Currency;
+import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.event_stock.*;
+import com.rbkmoney.damsel.event_stock.EventRange;
 import com.rbkmoney.damsel.payment_processing.*;
+import com.rbkmoney.eventstock.client.DefaultSubscriberConfig;
+import com.rbkmoney.eventstock.client.EventFilter;
+import com.rbkmoney.eventstock.client.EventHandler;
 import com.rbkmoney.thrift.filter.Filter;
 import com.rbkmoney.thrift.filter.PathConditionFilter;
 import com.rbkmoney.thrift.filter.condition.Relation;
+import com.rbkmoney.thrift.filter.converter.TemporalConverter;
 import com.rbkmoney.thrift.filter.rule.PathConditionRule;
 import com.rbkmoney.woody.thrift.impl.http.THServiceBuilder;
 import org.apache.thrift.TException;
@@ -23,12 +30,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.LongStream;
 
 /**
@@ -227,16 +232,6 @@ public class ClientTest extends AbstractTest {
         eventPublisher.destroy();
     }
 
-    //@Test
-    public void testServerRun() throws InterruptedException {
-
-        ERSImpl ers = new ERSImpl(Integer.MAX_VALUE);
-        addServlet(new THServiceBuilder().build(EventRepositorySrv.Iface.class, ers), "/test");
-
-
-       Thread.sleep(Integer.MAX_VALUE);
-    }
-
     private EventFilter createEventFilter(Long from, Long to, boolean addFilter) {
         com.rbkmoney.eventstock.client.EventRange eventRange = new com.rbkmoney.eventstock.client.EventConstraint.EventIDRange();
         eventRange.setFromInclusive(from);
@@ -259,12 +254,12 @@ public class ClientTest extends AbstractTest {
                                         new InvoiceCreated(
                                                 new Invoice(
                                                         id+"",
-                                                        new PartyRef(id+"", 1),
+                                                        new PartyRef("1", 1),
                                                         "1",
                                                         com.rbkmoney.thrift.filter.converter.TemporalConverter.temporalToString(Instant.now()),
-                                                        1,
+                                                        0,
                                                         InvoiceStatus.unpaid(new InvoiceUnpaid()),
-                                                        "",
+                                                        com.rbkmoney.thrift.filter.converter.TemporalConverter.temporalToString(Instant.now()),
                                                         "",
                                                         new Funds(100, new Currency("", "RUB", (short) 1, (short) 0)),
                                                         ByteBuffer.allocate(0)
