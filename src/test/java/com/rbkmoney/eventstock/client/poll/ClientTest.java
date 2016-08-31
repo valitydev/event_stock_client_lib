@@ -254,13 +254,11 @@ public class ClientTest extends AbstractTest {
                                         new InvoiceCreated(
                                                 new Invoice(
                                                         id+"",
-                                                        new PartyRef("1", 1),
-                                                        "1",
                                                         com.rbkmoney.thrift.filter.converter.TemporalConverter.temporalToString(Instant.now()),
-                                                        0,
+                                                        1,
                                                         InvoiceStatus.unpaid(new InvoiceUnpaid()),
                                                         com.rbkmoney.thrift.filter.converter.TemporalConverter.temporalToString(Instant.now()),
-                                                        "",
+                                                        "1",
                                                         new Funds(100, new Currency("", "RUB", (short) 1, (short) 0)),
                                                         ByteBuffer.allocate(0)
                                                 )
