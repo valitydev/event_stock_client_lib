@@ -4,6 +4,7 @@ import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.domain.Currency;
 import com.rbkmoney.damsel.event_stock.EventConstraint;
 import com.rbkmoney.damsel.event_stock.EventRange;
+import com.rbkmoney.damsel.payment_processing.Event;
 import com.rbkmoney.eventstock.client.*;
 import com.rbkmoney.damsel.base.InvalidRequest;
 import com.rbkmoney.damsel.domain.Currency;
@@ -19,7 +20,11 @@ import com.rbkmoney.thrift.filter.PathConditionFilter;
 import com.rbkmoney.thrift.filter.condition.Relation;
 import com.rbkmoney.thrift.filter.converter.TemporalConverter;
 import com.rbkmoney.thrift.filter.rule.PathConditionRule;
+import com.rbkmoney.woody.api.event.*;
+import com.rbkmoney.woody.api.trace.MetadataProperties;
+import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.thrift.impl.http.THServiceBuilder;
+import com.rbkmoney.woody.thrift.impl.http.THSpawnClientBuilder;
 import org.apache.thrift.TException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -108,19 +113,19 @@ public class ClientTest extends AbstractTest {
             latch.countDown();
         }
     }
-
-
     @Test
     public void testLimitedRange() throws URISyntaxException, InterruptedException {
         final List<Long> receivedIdList = new ArrayList<>();
         CountDownLatch latch = new CountDownLatch(1);
         ERSImpl ers = new ERSImpl(1000);
 
-        addServlet(new THServiceBuilder().build(EventRepositorySrv.Iface.class, ers), "/test");
+        addServlet(new THServiceBuilder().withEventListener(
+                (ServiceEventListener<ServiceEvent>) serviceEvent -> log.info(serviceEvent.getActiveSpan().getMetadata().getValue(MetadataProperties.CALL_ERROR))
+        ).build(EventRepositorySrv.Iface.class, ers), "/test");
 
         PollingEventPublisherBuilder eventPublisherBuilder = new PollingEventPublisherBuilder();
-        eventPublisherBuilder.withEventHandler(new EHImpl(latch, receivedIdList));
         eventPublisherBuilder.withURI(new URI(getUrlString("/test")));
+        eventPublisherBuilder.withEventHandler(new EHImpl(latch, receivedIdList));
         eventPublisherBuilder.withMaxQuerySize(2);
 
         PollingEventPublisher<StockEvent> eventPublisher = eventPublisherBuilder.build();
@@ -254,13 +259,14 @@ public class ClientTest extends AbstractTest {
                                         new InvoiceCreated(
                                                 new Invoice(
                                                         id+"",
-                                                        com.rbkmoney.thrift.filter.converter.TemporalConverter.temporalToString(Instant.now()),
+                                                        new PartyRef("1", 1),
+                                                        "1",
+                                                        "kek",
                                                         1,
                                                         InvoiceStatus.unpaid(new InvoiceUnpaid()),
-                                                        com.rbkmoney.thrift.filter.converter.TemporalConverter.temporalToString(Instant.now()),
-                                                        "1",
-                                                        new Funds(100, new Currency("", "RUB", (short) 1, (short) 0)),
-                                                        ByteBuffer.allocate(0)
+                                                        "kek",
+                                                        "kek",
+                                                        new Cash(100, new Currency("", "RUB", (short) 1, (short) 0))
                                                 )
                                         )
                                 )

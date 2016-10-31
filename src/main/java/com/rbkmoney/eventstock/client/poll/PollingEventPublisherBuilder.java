@@ -55,6 +55,26 @@ public class PollingEventPublisherBuilder {
         return this;
     }
 
+    public EventHandler getEventHandler() {
+        return eventHandler;
+    }
+
+    public ErrorHandler getErrorHandler() {
+        return errorHandler;
+    }
+
+    public int getMaxQuerySize() {
+        return maxQuerySize;
+    }
+
+    public int getMaxPoolSize() {
+        return maxPoolSize;
+    }
+
+    public int getPollDelay() {
+        return pollDelay;
+    }
+
     public PollingEventPublisherBuilder withEventHandler(EventHandler eventHandler) {
         if (eventHandler == null) {
             throw new NullPointerException("Null event handler");
@@ -92,10 +112,15 @@ public class PollingEventPublisherBuilder {
         return this;
     }
 
-    public PollingEventPublisher<StockEvent> build() {
-        THSpawnClientBuilder clientBuilder = new THSpawnClientBuilder();
-        clientBuilder.withAddress(uri);
 
+
+    protected THSpawnClientBuilder getClientBuilder() {
+        THSpawnClientBuilder clientBuilder = new THSpawnClientBuilder().withAddress(uri);
+        return clientBuilder;
+    }
+
+    public PollingEventPublisher<StockEvent> build() {
+        THSpawnClientBuilder clientBuilder = getClientBuilder();
         ESServiceAdapter serviceAdapter = new ESServiceAdapter(clientBuilder.build(EventRepositorySrv.Iface.class));
         Poller poller = new Poller(serviceAdapter, maxPoolSize, pollDelay);
 

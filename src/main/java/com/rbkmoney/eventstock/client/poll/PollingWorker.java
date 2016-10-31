@@ -191,11 +191,7 @@ class PollingWorker implements Runnable {
             StockEvent event = range.isFromNow() ? serviceAdapter.getLastEvent() : serviceAdapter.getFirstEvent();
             if (event == null) {
                 log.trace("No events in stock");
-                if (range.isFromNow()) {
-                    rangeWalker = null;
-                } else {
-                    rangeWalker = walkerCreator.apply(emptyRangeSupplier.get());
-                }
+                rangeWalker = null;
             } else {
                 T val = valExtractor.apply(event);
                 range.setFromInclusive(val);

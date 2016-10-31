@@ -42,7 +42,7 @@ class ESServiceAdapter implements ServiceAdapter<StockEvent, com.rbkmoney.events
             StockEvent stockEvent = repository.getFirstEvent();
             log.debug("Received event: {}", stockEvent);
             return stockEvent;
-        } catch (NoLastEvent e) {
+        } catch (NoStockEvent e) {
             return null;
         } catch (Exception e) {
             throw new ServiceException(e);
@@ -56,7 +56,7 @@ class ESServiceAdapter implements ServiceAdapter<StockEvent, com.rbkmoney.events
             StockEvent stockEvent = repository.getLastEvent();
             log.debug("Received event: {}", stockEvent);
             return stockEvent;
-        } catch (NoLastEvent e) {
+        } catch (NoStockEvent e) {
             return null;
         } catch (Exception e) {
             throw new ServiceException(e);
