@@ -5,12 +5,8 @@ import com.rbkmoney.damsel.domain.Currency;
 import com.rbkmoney.damsel.event_stock.EventConstraint;
 import com.rbkmoney.damsel.event_stock.EventRange;
 import com.rbkmoney.damsel.payment_processing.Event;
-import com.rbkmoney.eventstock.client.*;
 import com.rbkmoney.damsel.base.InvalidRequest;
-import com.rbkmoney.damsel.domain.Currency;
-import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.event_stock.*;
-import com.rbkmoney.damsel.event_stock.EventRange;
 import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.eventstock.client.DefaultSubscriberConfig;
 import com.rbkmoney.eventstock.client.EventFilter;
@@ -22,9 +18,7 @@ import com.rbkmoney.thrift.filter.converter.TemporalConverter;
 import com.rbkmoney.thrift.filter.rule.PathConditionRule;
 import com.rbkmoney.woody.api.event.*;
 import com.rbkmoney.woody.api.trace.MetadataProperties;
-import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.thrift.impl.http.THServiceBuilder;
-import com.rbkmoney.woody.thrift.impl.http.THSpawnClientBuilder;
 import org.apache.thrift.TException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -259,14 +252,13 @@ public class ClientTest extends AbstractTest {
                                         new InvoiceCreated(
                                                 new Invoice(
                                                         id+"",
-                                                        new PartyRef("1", 1),
-                                                        "1",
-                                                        "kek",
+                                                        "kek_id",
                                                         1,
+                                                        "kek_time",
                                                         InvoiceStatus.unpaid(new InvoiceUnpaid()),
-                                                        "kek",
-                                                        "kek",
-                                                        new Cash(100, new Currency("", "RUB", (short) 1, (short) 0))
+                                                        new InvoiceDetails("kek_product"),
+                                                        "kek_time",
+                                                        new Cash(100, new CurrencyRef("RUB"))
                                                 )
                                         )
                                 )
