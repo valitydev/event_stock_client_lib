@@ -6,6 +6,7 @@ import com.rbkmoney.eventstock.client.EventConstraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -25,7 +26,7 @@ class Poller {
     private static final int DEFAULT_MAX_POLL_DELAY = 1000;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final Map<String, Pair<Future, PollingWorker>> pollers = new HashMap<>();
+    private final Map<String, Map.Entry<Future, PollingWorker>> pollers = new HashMap<>();
     private final ServiceAdapter<StockEvent, EventConstraint> serviceAdapter;
     private final Lock lock = new ReentrantLock();
     private final ScheduledThreadPoolExecutor executorService;
@@ -67,7 +68,7 @@ class Poller {
             }
             PollingWorker pollingWorker = new PollingWorker(this, pollingConfig, serviceAdapter, subsKey);
             Future future = executorService.scheduleWithFixedDelay(pollingWorker, 0, pollDelay, TimeUnit.MILLISECONDS);
-            pollers.put(subsKey, new Pair<>(future, pollingWorker));
+            pollers.put(subsKey, new AbstractMap.SimpleImmutableEntry<>(future, pollingWorker));
             log.debug("Task added: {}", subsKey);
             return true;
         } finally {
@@ -90,7 +91,7 @@ class Poller {
         lock.lock();
         try {
             boolean removed;
-            Pair<Future, PollingWorker> pair = pollers.get(subsKey);
+            Map.Entry<Future, PollingWorker> pair = pollers.get(subsKey);
             if (pair != null) {
                 pair.getValue().stop();
                 pair.getKey().cancel(true);

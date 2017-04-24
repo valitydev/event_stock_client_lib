@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -26,6 +27,7 @@ class PollingWorker implements Runnable {
     private final WFlow wFlow = new WFlow();
     private RangeWalker<? extends Comparable, ? extends EventRange> rangeWalker;
     private boolean running = true;
+    private boolean noEventsInit = false;
     private int pollingLimit;
 
     public PollingWorker(Poller poller, PollingConfig<StockEvent> pollingConfig, ServiceAdapter<StockEvent, EventConstraint> serviceAdapter, String subscriptionKey) {
@@ -110,7 +112,7 @@ class PollingWorker implements Runnable {
                                 } else {
                                     val = Instant.from(ValuesExtractor.getCreatedAt(tmpLastEvent));
                                 }
-                                return new Pair(val, false);
+                                return new AbstractMap.SimpleImmutableEntry(val, false);
                             });
                             log.debug("Range moved to: {}", rangeWalker);
                         }
@@ -190,9 +192,10 @@ class PollingWorker implements Runnable {
         if (range.isFromDefined()) {
             rangeWalker = walkerCreator.apply(range);
         } else {
-            StockEvent event = range.isFromNow() ? serviceAdapter.getLastEvent() : serviceAdapter.getFirstEvent();
+            StockEvent event = !noEventsInit && range.isFromNow() ? serviceAdapter.getLastEvent() : serviceAdapter.getFirstEvent();
             if (event == null) {
                 log.trace("No events in stock");
+                noEventsInit = true;
                 rangeWalker = null;
             } else {
                 T val = valExtractor.apply(event);

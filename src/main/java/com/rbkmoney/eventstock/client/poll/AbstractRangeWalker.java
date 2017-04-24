@@ -2,6 +2,7 @@ package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.eventstock.client.EventRange;
 
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -34,8 +35,8 @@ abstract  class AbstractRangeWalker<T extends Comparable> implements RangeWalker
     }
 
     @Override
-    public EventRange moveRange(BiFunction<RangeWalker<T, EventRange<T>>, Boolean, Pair<T, Boolean>> function) {
-        Pair<T, Boolean> fromBoundPair = function.apply(this, walkingRange.isFromInclusive());
+    public EventRange moveRange(BiFunction<RangeWalker<T, EventRange<T>>, Boolean, Map.Entry<T, Boolean>> function) {
+        Map.Entry<T, Boolean> fromBoundPair = function.apply(this, walkingRange.isFromInclusive());
         T walkingFromBound = fromBoundPair.getKey();
         boolean walkingFromInclusive = fromBoundPair.getValue();
         walkingRange = createRange(walkingFromBound, walkingFromInclusive, range.getTo(), range.isToInclusive(), range);

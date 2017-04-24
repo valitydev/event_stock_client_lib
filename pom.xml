@@ -12,7 +12,7 @@
 
     <groupId>com.rbkmoney</groupId>
     <artifactId>eventstock-client</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
 
     <dependencies>
         <!--RBK libs-->
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>damsel</artifactId>
-            <version>1.138-159842a</version>
+            <version>1.155-e68f0da-epic</version>
             <scope>provided</scope>
         </dependency>
         <!--Thirdparty libs-->

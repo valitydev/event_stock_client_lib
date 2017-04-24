@@ -2,6 +2,7 @@ package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.eventstock.client.EventRange;
 
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -34,7 +35,7 @@ interface RangeWalker<T extends Comparable, R extends EventRange<T>> {
      * @param function returns new bound value based on current from and to values.
      * @return moved range, which is equal to {@link #getWalkingRange()} result or null if range is over.
      * */
-    R moveRange(BiFunction<RangeWalker<T, R>, Boolean, Pair<T, Boolean>> function);
+    R moveRange(BiFunction<RangeWalker<T, R>, Boolean, Map.Entry<T, Boolean>> function);
 
     /**
      * @return true - if current range is out of initial range bounds; false - otherwise.

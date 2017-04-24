@@ -1,22 +1,17 @@
 package com.rbkmoney.eventstock.client.poll;
 
-import com.rbkmoney.damsel.domain.*;
-import com.rbkmoney.damsel.domain.Currency;
-import com.rbkmoney.damsel.event_stock.EventConstraint;
-import com.rbkmoney.damsel.event_stock.EventRange;
-import com.rbkmoney.damsel.payment_processing.Event;
 import com.rbkmoney.damsel.base.InvalidRequest;
 import com.rbkmoney.damsel.event_stock.*;
-import com.rbkmoney.damsel.payment_processing.*;
+import com.rbkmoney.damsel.payment_processing.NoLastEvent;
 import com.rbkmoney.eventstock.client.DefaultSubscriberConfig;
 import com.rbkmoney.eventstock.client.EventFilter;
 import com.rbkmoney.eventstock.client.EventHandler;
 import com.rbkmoney.thrift.filter.Filter;
 import com.rbkmoney.thrift.filter.PathConditionFilter;
 import com.rbkmoney.thrift.filter.condition.Relation;
-import com.rbkmoney.thrift.filter.converter.TemporalConverter;
 import com.rbkmoney.thrift.filter.rule.PathConditionRule;
-import com.rbkmoney.woody.api.event.*;
+import com.rbkmoney.woody.api.event.ServiceEvent;
+import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.trace.MetadataProperties;
 import com.rbkmoney.woody.thrift.impl.http.THServiceBuilder;
 import org.apache.thrift.TException;
@@ -27,8 +22,9 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,7 +34,6 @@ import java.util.stream.LongStream;
  * Created by vpankrashkin on 29.06.16.
  */
 public class ClientTest extends AbstractTest {
-    private static final Logger log = LoggerFactory.getLogger(ClientTest.class);
     private class ERSImpl implements EventRepositorySrv.Iface {
         final  Long lastEventId = 0L;
         final Long firstEventId = 0L;
@@ -230,75 +225,6 @@ public class ClientTest extends AbstractTest {
         eventPublisher.destroy();
     }
 
-    private EventFilter createEventFilter(Long from, Long to, boolean addFilter) {
-        com.rbkmoney.eventstock.client.EventRange eventRange = new com.rbkmoney.eventstock.client.EventConstraint.EventIDRange();
-        eventRange.setFromInclusive(from);
-        eventRange.setToExclusive(to);
-        Filter filter = !addFilter ? null : new PathConditionFilter(new PathConditionRule("payload.invoice_event.invoice_status_changed.status", new com.rbkmoney.thrift.filter.condition.CompareCondition("unpaid", Relation.EQ)));
-        EventFlowFilter eventFlowFilter = new EventFlowFilter(new com.rbkmoney.eventstock.client.EventConstraint(eventRange), filter);
-        return eventFlowFilter;
-    }
 
-    private Event createEvent(long id, boolean flag) {
-        String timeString =  TemporalConverter.temporalToString(Instant.now());
-        Event event = flag ?
-                new Event(
-                        id,
-                        timeString,
-                        EventSource.invoice(""+id),
-                        0,
-                        EventPayload.invoice_event(
-                                InvoiceEvent.invoice_created(
-                                        new InvoiceCreated(
-                                                new Invoice(
-                                                        id+"",
-                                                        "kek_id",
-                                                        1,
-                                                        "kek_time",
-                                                        InvoiceStatus.unpaid(new InvoiceUnpaid()),
-                                                        new InvoiceDetails("kek_product"),
-                                                        "kek_time",
-                                                        new Cash(100, new CurrencyRef("RUB"))
-                                                )
-                                        )
-                                )
-                        )
-                )
-                :
-                new Event(
-                        id,
-                        timeString,
-                        EventSource.invoice(""+(id-1)),
-                        0,
-                        EventPayload.invoice_event(
-                                InvoiceEvent.invoice_status_changed(
-                                        new InvoiceStatusChanged(
-                                                InvoiceStatus.unpaid(
-                                                        new InvoiceUnpaid())))));
-        return event;
-    }
 
-    private List<StockEvent> createEvents(EventConstraint constraint, long expectedMax) {
-        EventIDRange idRange = constraint.getEventRange().getIdRange();
-        Long fromId = (Long) idRange.getFromId().getFieldValue();
-        Long toId = (Long) Optional.of(idRange).map(EventIDRange::getToId).map(EventIDBound::getFieldValue).orElse(null);
-        if (fromId >= expectedMax) {
-            return Collections.emptyList();
-        }
-        toId = toId == null ? Long.MAX_VALUE : toId;
-        int limit = constraint.getLimit();
-        if (fromId >= toId) {
-            return Collections.emptyList();
-        } else {
-            List list = new ArrayList();
-            for (long i = (constraint.getEventRange().getIdRange().getFromId().isSetInclusive() ? 0 : 1), counter = 0;
-                 counter < limit && i+fromId <= (Optional.of(constraint).map(EventConstraint::getEventRange).map(EventRange::getIdRange).map(EventIDRange::getToId).map(EventIDBound::isSetInclusive).orElse(false) ? toId : toId-1);
-                 ++i, ++counter) {
-                long id = i+fromId;
-                if (id <= expectedMax)
-                list.add(new StockEvent(SourceEvent.processing_event(createEvent(id, id % 2 ==0))));
-            }
-            return list;
-        }
-    }
 }
