@@ -2,6 +2,7 @@ package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.damsel.event_stock.*;
 import com.rbkmoney.damsel.event_stock.EventConstraint;
+import com.rbkmoney.thrift.filter.converter.TemporalConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,4 +63,41 @@ class ESServiceAdapter implements ServiceAdapter<StockEvent, com.rbkmoney.events
         }
     }
 
+    public static EventConstraint convertConstraint(com.rbkmoney.eventstock.client.EventConstraint scrConstraint, int limit) {
+        EventRange resRange = new EventRange();
+        if (scrConstraint.getIdRange() != null) {
+            resRange.setIdRange(convertRange(scrConstraint.getIdRange()));
+        } else if (scrConstraint.getTimeRange() != null) {
+            resRange.setTimeRange(convertRange(scrConstraint.getTimeRange()));
+        }
+        return new EventConstraint(resRange, limit);
+    }
+
+    private static EventIDRange convertRange(com.rbkmoney.eventstock.client.EventConstraint.EventIDRange srcIdRange) {
+        EventIDRange resIdRange = new EventIDRange();
+
+        if (srcIdRange.isFromDefined()) {
+            resIdRange.setFromId(srcIdRange.isFromInclusive() ? EventIDBound.inclusive(srcIdRange.getFrom()) : EventIDBound.exclusive(srcIdRange.getFrom()));
+        }
+        if (srcIdRange.isToDefined()) {
+            resIdRange.setToId(srcIdRange.isToInclusive() ? EventIDBound.inclusive(srcIdRange.getTo()) : EventIDBound.exclusive(srcIdRange.getTo()));
+        }
+
+        return resIdRange;
+    }
+
+    private static EventTimeRange convertRange(com.rbkmoney.eventstock.client.EventConstraint.EventTimeRange srcTimeRange) {
+        EventTimeRange resTimeRange = new EventTimeRange();
+
+        if (srcTimeRange.isFromDefined()) {
+            String timeStr = TemporalConverter.temporalToString(srcTimeRange.getFrom());
+            resTimeRange.setFromTime(srcTimeRange.isFromInclusive() ? EventTimeBound.inclusive(timeStr) : EventTimeBound.exclusive(timeStr));
+        }
+        if (srcTimeRange.isToDefined()) {
+            String timeStr = TemporalConverter.temporalToString(srcTimeRange.getTo());
+            resTimeRange.setToTime(srcTimeRange.isToInclusive() ? EventTimeBound.inclusive(timeStr) : EventTimeBound.exclusive(timeStr));
+        }
+
+        return resTimeRange;
+    }
 }

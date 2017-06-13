@@ -2,11 +2,9 @@ package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.damsel.base.InvalidRequest;
 import com.rbkmoney.damsel.event_stock.*;
+import com.rbkmoney.damsel.event_stock.EventConstraint;
 import com.rbkmoney.damsel.payment_processing.NoLastEvent;
-import com.rbkmoney.eventstock.client.APIConversionUtil;
-import com.rbkmoney.eventstock.client.DefaultSubscriberConfig;
-import com.rbkmoney.eventstock.client.EventFilter;
-import com.rbkmoney.eventstock.client.EventHandler;
+import com.rbkmoney.eventstock.client.*;
 import com.rbkmoney.woody.api.event.ServiceEvent;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.event.ServiceEventType;
@@ -109,12 +107,18 @@ public class LoosingInitStartTest extends AbstractTest {
         eventPublisherBuilder.withURI(new URI(getUrlString("/test")));
         eventPublisherBuilder.withEventHandler(new EventHandler<StockEvent>() {
             @Override
-            public void handleEvent(StockEvent event, String subsKey) {
+            public EventAction handle(StockEvent event, String subsKey) {
                 receivedIdList.add(event.getSourceEvent().getProcessingEvent().getId());
+                return EventAction.CONTINUE;
             }
 
             @Override
-            public void handleNoMoreElements(String subsKey) {
+            public void handleCompleted(String subsKey) {
+                latch.countDown();
+            }
+
+            @Override
+            public void handleInterrupted(String subsKey) {
                 latch.countDown();
             }
         });

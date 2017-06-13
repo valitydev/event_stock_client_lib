@@ -1,11 +1,10 @@
 package com.rbkmoney.eventstock.client.poll;
 
+import com.rbkmoney.damsel.event_stock.EventConstraint;
 import com.rbkmoney.damsel.base.InvalidRequest;
 import com.rbkmoney.damsel.event_stock.*;
-import com.rbkmoney.damsel.payment_processing.NoLastEvent;
-import com.rbkmoney.eventstock.client.DefaultSubscriberConfig;
-import com.rbkmoney.eventstock.client.EventFilter;
-import com.rbkmoney.eventstock.client.EventHandler;
+import com.rbkmoney.damsel.payment_processing.*;
+import com.rbkmoney.eventstock.client.*;
 import com.rbkmoney.thrift.filter.Filter;
 import com.rbkmoney.thrift.filter.PathConditionFilter;
 import com.rbkmoney.thrift.filter.condition.Relation;
@@ -22,9 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,6 +31,7 @@ import java.util.stream.LongStream;
  * Created by vpankrashkin on 29.06.16.
  */
 public class ClientTest extends AbstractTest {
+    private static final Logger log = LoggerFactory.getLogger(ClientTest.class);
     private class ERSImpl implements EventRepositorySrv.Iface {
         final  Long lastEventId = 0L;
         final Long firstEventId = 0L;
@@ -51,13 +49,13 @@ public class ClientTest extends AbstractTest {
         public List<StockEvent> getEvents(EventConstraint constraint) throws InvalidRequest, DatasetTooBig, TException {
             log.info("Client: Get Events: {}", constraint);
             rangeRequestsCount.incrementAndGet();
-            return createEvents(constraint, expectedMax);
+            return EventGenerator.createEvents(constraint, expectedMax);
         }
 
         @Override
         public StockEvent getLastEvent() throws NoLastEvent, TException {
             log.info("Client: Get last event");
-            StockEvent event = new StockEvent(SourceEvent.processing_event(createEvent(lastEventId, true)));
+            StockEvent event = new StockEvent(SourceEvent.processing_event(EventGenerator.createEvent(lastEventId, true)));
             log.info("Client: result: {}", event);
             return event;
         }
@@ -65,7 +63,7 @@ public class ClientTest extends AbstractTest {
         @Override
         public StockEvent getFirstEvent() throws NoStockEvent, TException {
             log.info("Client: Get first event");
-            StockEvent event = new StockEvent(SourceEvent.processing_event(createEvent(firstEventId, true)));
+            StockEvent event = new StockEvent(SourceEvent.processing_event(EventGenerator.createEvent(firstEventId, true)));
             log.info("Client: result: {}", event);
             return event;
         }
@@ -88,14 +86,15 @@ public class ClientTest extends AbstractTest {
         }
 
         @Override
-        public void handleEvent(StockEvent event, String subsKey) {
+        public EventAction handle(StockEvent event, String subsKey) {
             log.info(subsKey+":Handled object: "+event);
             if (eventIds != null)
             eventIds.add(((StockEvent) event).getSourceEvent().getProcessingEvent().getId());
+            return EventAction.CONTINUE;
         }
 
         @Override
-        public void handleNoMoreElements(String subsKey) {
+        public void handleCompleted(String subsKey) {
             log.info(subsKey+":No more elements");
             if (latch != null)
             latch.countDown();
@@ -224,7 +223,5 @@ public class ClientTest extends AbstractTest {
         Assert.assertTrue(ers.getRangeRequestsCount() > 7);
         eventPublisher.destroy();
     }
-
-
 
 }

@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -19,23 +21,38 @@ import java.util.function.Supplier;
 class PollingWorker implements Runnable {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
+    private static final int WORKING = 0;
+    private static final int SUSPEND = 1;
+    private static final int RANGE_OVER = 2;
+    private static final int HANDLER_INTERRUPTION = 3;
+
     private final Poller poller;
     private final PollingConfig<StockEvent> pollingConfig;
     private final ServiceAdapter<StockEvent, EventConstraint> serviceAdapter;
     private final String subscriptionKey;
     private final Runnable task = () -> runPolling();
     private final WFlow wFlow = new WFlow();
+    private final HandlerListener<StockEvent> handlerListener;
     private RangeWalker<? extends Comparable, ? extends EventRange> rangeWalker;
     private boolean running = true;
     private boolean noEventsInit = false;
     private int pollingLimit;
 
-    public PollingWorker(Poller poller, PollingConfig<StockEvent> pollingConfig, ServiceAdapter<StockEvent, EventConstraint> serviceAdapter, String subscriptionKey) {
+    public PollingWorker(Poller poller, PollingConfig<StockEvent> pollingConfig, ServiceAdapter<StockEvent, EventConstraint> serviceAdapter, HandlerListener<StockEvent> handlerListener, String subscriptionKey) {
+        Objects.requireNonNull(poller, "Poller required");
         this.poller = poller;
+        Objects.requireNonNull(pollingConfig, "PollingConfig required");
         this.pollingConfig = pollingConfig;
+        Objects.requireNonNull(poller, "ServiceAdapter required");
         this.serviceAdapter = serviceAdapter;
+        Objects.requireNonNull(poller, "HandlerListener required");
+        this.handlerListener = handlerListener;
+        Objects.requireNonNull(poller, "SubscriptionKey required");
         this.subscriptionKey = subscriptionKey;
         this.pollingLimit = pollingConfig.getMaxQuerySize();
+        if (pollingLimit <= 0) {
+            throw new IllegalArgumentException("Polling limit must be > 0");
+        }
     }
 
     @Override
@@ -43,12 +60,26 @@ class PollingWorker implements Runnable {
         task.run();
     }
 
+    public PollingConfig<StockEvent> getPollingConfig() {
+        return pollingConfig;
+    }
+
+    private boolean isWorking(Thread worker) {
+        return running && !worker.isInterrupted();
+    }
+
+    private boolean hasWorkingFlag(int flag) {
+        return flag == WORKING;
+    }
+
     private synchronized void runPolling() {
         wFlow.createServiceFork(() -> {
             try {
                 LogSupport.setSubscriptionKey(subscriptionKey);
-                boolean exhausted = false;
-                boolean suspended = false;
+                int completionFlag = WORKING;
+
+                Thread worker = Thread.currentThread();
+                int bindingId = handlerListener.bindId(worker);
 
                 try {
                     if (rangeWalker == null) {
@@ -62,10 +93,10 @@ class PollingWorker implements Runnable {
                         }
                     }
 
-                    while (running && !exhausted && !suspended && !Thread.currentThread().isInterrupted()) {
+                    while (hasWorkingFlag(completionFlag) && isWorking(worker)) {
                         if (rangeWalker.isRangeOver()) {
                             log.debug("Range is over: {}", rangeWalker);
-                            exhausted = true;
+                            completionFlag = RANGE_OVER;
                             continue;
                         }
 
@@ -73,51 +104,41 @@ class PollingWorker implements Runnable {
 
                         log.debug("Tying to get event range, constraint: {}, limit: {}", currentConstraint, pollingLimit);
                         Collection<StockEvent> events = serviceAdapter.getEventRange(currentConstraint, pollingLimit);
-                        EventHandler<StockEvent> eventHandler = pollingConfig.getEventHandler();
-                        StockEvent lastEvent = null;
-                        for (StockEvent event : events) {
-                            if (!running) {
-                                break;
-                            }
-                            lastEvent = event;
+
+                        StockEvent event = null;
+                        try {
+                        for (Iterator<StockEvent> it = events.iterator(); hasWorkingFlag(completionFlag) && it.hasNext(); ) {
+                            event = it.next();
                             try {
                                 if (!pollingConfig.getEventFilter().accept(event)) {
                                     log.trace("Event not accepted: {}", event);
                                     continue;
                                 }
                                 log.trace("Event accepted: {}", event);
-                                eventHandler.handleEvent(event, subscriptionKey);
+
+                                completionFlag = processEvent(event, bindingId, worker);
                             } catch (Throwable t) {
                                 if (markIfInterrupted(t)) {
                                     log.error("Event handling was interrupted, [break]");
                                     break;
                                 } else {
-                                    log.error("Error during event handling event: [" + event + "]", t);
+                                    log.error("Error during handling event: [" + event + "]", t);
                                 }
                             }
                         }
-                        if (events.size() < pollingLimit) {
-                            if (rangeWalker.getWalkingRange().isToDefined()) {
-                                exhausted = true;
-                            } else {
-                                suspended = true;
-                            }
+                        } finally {
+                            handlerListener.unbindId(worker);
                         }
-                        if (lastEvent != null) {
-                            final StockEvent tmpLastEvent = lastEvent;
-                            rangeWalker.moveRange((walker, boundInclusive) -> {
-                                Comparable val;
-                                if (walker instanceof IdRangeWalker) {
-                                    val = ValuesExtractor.getEventId(tmpLastEvent);
-                                } else {
-                                    val = Instant.from(ValuesExtractor.getCreatedAt(tmpLastEvent));
-                                }
-                                return new AbstractMap.SimpleImmutableEntry(val, false);
-                            });
-                            log.debug("Range moved to: {}", rangeWalker);
+
+                        if (hasWorkingFlag(completionFlag)) {
+                            if (events.size() < pollingLimit) {
+                                completionFlag = rangeWalker.getWalkingRange().isToDefined() ? RANGE_OVER : SUSPEND;
+                            }
+                            if (event != null) {
+                                moveRange(event);
+                            }
                         }
                     }
-
 
                 } catch (ServiceException e) {
                     if (e.getCause() instanceof DatasetTooBig) {
@@ -128,18 +149,18 @@ class PollingWorker implements Runnable {
                     } else if (markIfInterrupted(e.getCause())) {
                         log.info("Task interrupted [break]");
                         return;
-                    } else  {
+                    } else {
                         log.warn("Failed to execute request to repository service, caused by: {}", e.getMessage());
 
                         try {
-                            ErrorActionType actionType = pollingConfig.getErrorHandler().handleError(subscriptionKey, e);
+                            ErrorAction actionType = pollingConfig.getErrorHandler().handleError(subscriptionKey, e);
                             switch (actionType) {
                                 case RETRY:
                                     log.warn("Retry request after error");
-                                    return;
+                                    break;
                                 case INTERRUPT:
                                     log.warn("Interrupt request after error");
-                                    exhausted = true;
+                                    completionFlag = HANDLER_INTERRUPTION;
                                     break;
                                 default:
                                     throw new IllegalStateException("Unknown error action: " + actionType);
@@ -149,17 +170,21 @@ class PollingWorker implements Runnable {
                             markIfInterrupted(t);
                         }
                     }
+                } finally {
+                    handlerListener.unbindId(worker);
                 }
 
-                if (exhausted) {
-                    log.debug("Subscription exhausted");
-                    poller.directRemovePolling(subscriptionKey);
-                    try {
-                        pollingConfig.getEventHandler().handleNoMoreElements(subscriptionKey);
-                    } catch (Throwable t) {
-                        log.error("Error during event handling [exhausted]", t);
-                        markIfInterrupted(t);
-                    }
+                switch (completionFlag) {
+                    case RANGE_OVER:
+                        log.debug("Subscription completed");
+                        poller.directRemovePolling(subscriptionKey, false);
+                        break;
+                    case HANDLER_INTERRUPTION:
+                        log.debug("Subscription interrupted");
+                        poller.directRemovePolling(subscriptionKey, true);
+                        break;
+                    default:
+                        //do nothing
                 }
             } catch (Throwable t) {
                 log.error("Error during poll processing, task is broken", t);
@@ -174,6 +199,53 @@ class PollingWorker implements Runnable {
 
     void stop() {
         running = false;
+    }
+
+    private int processEvent(StockEvent event, int bindingId, Thread worker) {
+        int completionFlag = WORKING;
+        EventHandler<StockEvent> eventHandler = pollingConfig.getEventHandler();
+        handling:
+        while (true) {
+            if (!isWorking(worker)) {
+                completionFlag = HANDLER_INTERRUPTION;
+                break;
+            }
+
+            EventAction eventAction;
+            handlerListener.beforeHandle(bindingId, event, subscriptionKey);
+            try {
+                eventAction = eventHandler.handle(event, subscriptionKey);
+            } finally {
+                handlerListener.afterHandle(bindingId, event, subscriptionKey);
+            }
+            switch (eventAction) {
+                case RETRY:
+                    log.info("Handler requested retry on event: {}", event);
+                    continue handling;
+                case CONTINUE:
+                    break handling;
+                case INTERRUPT:
+                    log.info("Handler requested interruption on event: {}", event);
+                    completionFlag = HANDLER_INTERRUPTION;
+                    break handling;
+                default:
+                    throw new IllegalStateException("Unknown action: " + eventAction);
+            }
+        }
+        return completionFlag;
+    }
+
+    private void moveRange(final StockEvent lastEvent) {
+        rangeWalker.moveRange((walker, boundInclusive) -> {
+            Comparable val;
+            if (walker instanceof IdRangeWalker) {
+                val = ValuesExtractor.getEventId(lastEvent);
+            } else {
+                val = Instant.from(ValuesExtractor.getCreatedAt(lastEvent));
+            }
+            return new AbstractMap.SimpleEntry(val, false);
+        });
+        log.debug("Range moved to: {}", rangeWalker);
     }
 
     private RangeWalker initRange(EventConstraint constraint) throws ServiceException {

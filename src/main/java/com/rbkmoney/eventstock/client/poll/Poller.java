@@ -3,6 +3,7 @@ package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.damsel.event_stock.StockEvent;
 import com.rbkmoney.eventstock.client.EventConstraint;
+import com.rbkmoney.eventstock.client.HandlerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,16 +29,17 @@ class Poller {
 
     private final Map<String, Map.Entry<Future, PollingWorker>> pollers = new HashMap<>();
     private final ServiceAdapter<StockEvent, EventConstraint> serviceAdapter;
+    private final HandlerListener handlerListener;
     private final Lock lock = new ReentrantLock();
     private final ScheduledThreadPoolExecutor executorService;
     private final int pollDelay;
     private final AtomicBoolean running = new AtomicBoolean(true);
 
-    public Poller(ServiceAdapter<StockEvent, EventConstraint> serviceAdapter) {
-        this(serviceAdapter, DEFAULT_MAX_POOL_SIZE, DEFAULT_MAX_POLL_DELAY);
+    public Poller(ServiceAdapter<StockEvent, EventConstraint> serviceAdapter, HandlerListener handlerListener) {
+        this(serviceAdapter, handlerListener, DEFAULT_MAX_POOL_SIZE, DEFAULT_MAX_POLL_DELAY);
     }
 
-    public Poller(ServiceAdapter<StockEvent, EventConstraint> serviceAdapter, int maxPoolSize, int pollDelay) {
+    public Poller(ServiceAdapter<StockEvent, EventConstraint> serviceAdapter, HandlerListener handlerListener, int maxPoolSize, int pollDelay) {
         this.executorService = new ScheduledThreadPoolExecutor(1,
                 new ThreadFactory() {
                     AtomicInteger counter = new AtomicInteger();
@@ -55,6 +57,7 @@ class Poller {
             executorService.setMaximumPoolSize(maxPoolSize);
         }
         this.serviceAdapter = serviceAdapter;
+        this.handlerListener = handlerListener;
         this.pollDelay = pollDelay;
     }
 
@@ -66,7 +69,7 @@ class Poller {
             if (pollers.containsKey(subsKey)) {
                 return false;
             }
-            PollingWorker pollingWorker = new PollingWorker(this, pollingConfig, serviceAdapter, subsKey);
+            PollingWorker pollingWorker = new PollingWorker(this, pollingConfig, serviceAdapter, handlerListener, subsKey);
             Future future = executorService.scheduleWithFixedDelay(pollingWorker, 0, pollDelay, TimeUnit.MILLISECONDS);
             pollers.put(subsKey, new AbstractMap.SimpleImmutableEntry<>(future, pollingWorker));
             log.debug("Task added: {}", subsKey);
@@ -88,22 +91,34 @@ class Poller {
     }
 
     boolean directRemovePolling(String subsKey) {
+        return directRemovePolling(subsKey, false);
+    }
+
+
+        boolean directRemovePolling(String subsKey, boolean interrupted) {
+        PollingWorker worker = null;
+        boolean removed = false;
         lock.lock();
         try {
-            boolean removed;
             Map.Entry<Future, PollingWorker> pair = pollers.get(subsKey);
             if (pair != null) {
                 pair.getValue().stop();
                 pair.getKey().cancel(true);
                 pollers.remove(subsKey);
+                worker = pair.getValue();
                 removed = true;
-            } else {
-                removed = false;
             }
-            logTaskRemoval(removed, subsKey);
             return removed;
         } finally {
             lock.unlock();
+            if (worker != null) {
+                if (interrupted) {
+                    worker.getPollingConfig().getEventHandler().handleInterrupted(subsKey);
+                } else {
+                    worker.getPollingConfig().getEventHandler().handleCompleted(subsKey);
+                }
+            }
+            logTaskRemoval(removed, subsKey);
         }
     }
 
@@ -122,7 +137,11 @@ class Poller {
         lock.lock();
         try {
             for (String subsKey : pollers.keySet()) {
-                logTaskRemoval(directRemovePolling(subsKey), subsKey);
+                try {
+                    directRemovePolling(subsKey);
+                } catch (Throwable t) {
+                    log.error("Failed to remove subscription correctly", t);
+                }
             }
         } finally {
             lock.unlock();
@@ -151,6 +170,7 @@ class Poller {
         } else {
             log.warn("Poller is already marked as destroyed.");
         }
+        handlerListener.destroy();
     }
 
     private void checkState() {
