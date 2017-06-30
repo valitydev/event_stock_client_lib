@@ -1,6 +1,6 @@
 package com.rbkmoney.eventstock.client.poll;
 
-import com.rbkmoney.thrift.filter.converter.TemporalConverter;
+import com.rbkmoney.geck.common.util.TypeUtil;
 import org.junit.Test;
 
 import java.time.Instant;
@@ -16,7 +16,7 @@ public class TemporalConverterTest {
     @Test
     public void testConvertation() {
         String timeStr = "2016-03-22T06:12:27Z";
-        Instant instant = Instant.from(TemporalConverter.stringToTemporal(timeStr));
+        Instant instant = Instant.from(TypeUtil.stringToTemporal(timeStr));
 
         LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneOffset.UTC.normalized());
         assertEquals(2016, ldt.getYear());
@@ -24,6 +24,6 @@ public class TemporalConverterTest {
         assertEquals(12, ldt.getMinute());
         assertEquals(27, ldt.getSecond());
 
-        assertEquals(timeStr, TemporalConverter.temporalToString(instant));
+        assertEquals(timeStr, TypeUtil.temporalToString(instant));
     }
 }

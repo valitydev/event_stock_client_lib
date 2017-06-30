@@ -4,11 +4,11 @@ import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.event_stock.*;
 import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.eventstock.client.EventFilter;
-import com.rbkmoney.thrift.filter.Filter;
-import com.rbkmoney.thrift.filter.PathConditionFilter;
-import com.rbkmoney.thrift.filter.condition.Relation;
-import com.rbkmoney.thrift.filter.converter.TemporalConverter;
-import com.rbkmoney.thrift.filter.rule.PathConditionRule;
+import com.rbkmoney.geck.common.util.TypeUtil;
+import com.rbkmoney.geck.filter.Filter;
+import com.rbkmoney.geck.filter.PathConditionFilter;
+import com.rbkmoney.geck.filter.condition.IsNullCondition;
+import com.rbkmoney.geck.filter.rule.PathConditionRule;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.generator.IdGenerator;
@@ -132,7 +132,7 @@ public class AbstractTest {
     }
 
     protected static Event createEvent(long id, boolean flag) {
-        String timeString =  TemporalConverter.temporalToString(Instant.now());
+        String timeString =  TypeUtil.temporalToString(Instant.now());
         Event event = flag ?
                 new Event(
                         id,
@@ -198,7 +198,7 @@ public class AbstractTest {
         com.rbkmoney.eventstock.client.EventRange eventRange = new com.rbkmoney.eventstock.client.EventConstraint.EventIDRange();
         eventRange.setFromInclusive(from);
         eventRange.setToExclusive(to);
-        Filter filter = !addFilter ? null : new PathConditionFilter(new PathConditionRule("payload.invoice_event.invoice_status_changed.status", new com.rbkmoney.thrift.filter.condition.CompareCondition("unpaid", Relation.EQ)));
+        Filter filter = !addFilter ? null : new PathConditionFilter(new PathConditionRule("payload.invoice_event.invoice_status_changed.status.unpaid", new IsNullCondition().not()));
         EventFlowFilter eventFlowFilter = new EventFlowFilter(new com.rbkmoney.eventstock.client.EventConstraint(eventRange), filter);
         return eventFlowFilter;
     }

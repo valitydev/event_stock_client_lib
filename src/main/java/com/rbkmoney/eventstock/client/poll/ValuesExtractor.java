@@ -3,7 +3,7 @@ package com.rbkmoney.eventstock.client.poll;
 import com.rbkmoney.damsel.event_stock.SourceEvent;
 import com.rbkmoney.damsel.event_stock.StockEvent;
 import com.rbkmoney.damsel.payment_processing.Event;
-import com.rbkmoney.thrift.filter.converter.TemporalConverter;
+import com.rbkmoney.geck.common.util.TypeUtil;
 
 import java.time.temporal.TemporalAccessor;
 import java.util.Optional;
@@ -18,6 +18,6 @@ class ValuesExtractor {
 
     public static TemporalAccessor getCreatedAt(StockEvent event) {
         String createdAtStr = Optional.of(event).map(StockEvent::getSourceEvent).map(SourceEvent::getProcessingEvent).map(Event::getCreatedAt).orElse(null);
-        return TemporalConverter.stringToTemporal(createdAtStr);
+        return TypeUtil.stringToTemporal(createdAtStr);
     }
 }

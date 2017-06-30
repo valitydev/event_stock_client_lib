@@ -2,14 +2,9 @@ package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.event_stock.*;
-import com.rbkmoney.damsel.event_stock.EventConstraint;
 import com.rbkmoney.damsel.event_stock.EventRange;
 import com.rbkmoney.damsel.payment_processing.*;
-import com.rbkmoney.eventstock.client.*;
-import com.rbkmoney.eventstock.client.poll.ESServiceAdapter;
-import com.rbkmoney.eventstock.client.poll.ServiceAdapter;
-import com.rbkmoney.eventstock.client.poll.ServiceException;
-import com.rbkmoney.thrift.filter.converter.TemporalConverter;
+import com.rbkmoney.geck.common.util.TypeUtil;
 
 import java.time.Instant;
 import java.util.*;
@@ -23,7 +18,7 @@ public class EventGenerator {
     }
 
     public static Event createEvent(long id, boolean flag) {
-        String timeString =  TemporalConverter.temporalToString(Instant.now());
+        String timeString =  TypeUtil.temporalToString(Instant.now());
         Event event = flag ?
                 new Event(
                         id,

@@ -2,13 +2,11 @@ package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.damsel.event_stock.*;
 import com.rbkmoney.damsel.event_stock.EventConstraint;
-import com.rbkmoney.thrift.filter.converter.TemporalConverter;
+import com.rbkmoney.geck.common.util.TypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-
-import static com.rbkmoney.eventstock.client.APIConversionUtil.convertConstraint;
 
 /**
  * Created by vpankrashkin on 29.06.16.
@@ -90,11 +88,11 @@ class ESServiceAdapter implements ServiceAdapter<StockEvent, com.rbkmoney.events
         EventTimeRange resTimeRange = new EventTimeRange();
 
         if (srcTimeRange.isFromDefined()) {
-            String timeStr = TemporalConverter.temporalToString(srcTimeRange.getFrom());
+            String timeStr = TypeUtil.temporalToString(srcTimeRange.getFrom());
             resTimeRange.setFromTime(srcTimeRange.isFromInclusive() ? EventTimeBound.inclusive(timeStr) : EventTimeBound.exclusive(timeStr));
         }
         if (srcTimeRange.isToDefined()) {
-            String timeStr = TemporalConverter.temporalToString(srcTimeRange.getTo());
+            String timeStr = TypeUtil.temporalToString(srcTimeRange.getTo());
             resTimeRange.setToTime(srcTimeRange.isToInclusive() ? EventTimeBound.inclusive(timeStr) : EventTimeBound.exclusive(timeStr));
         }
 

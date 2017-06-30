@@ -1,6 +1,6 @@
 package com.rbkmoney.eventstock.client;
 
-import com.rbkmoney.thrift.filter.Filter;
+import com.rbkmoney.geck.filter.Filter;
 
 /**
  * Created by vpankrashkin on 28.06.16.

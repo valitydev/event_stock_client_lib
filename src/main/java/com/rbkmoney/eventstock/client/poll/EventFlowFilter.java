@@ -3,7 +3,7 @@ package com.rbkmoney.eventstock.client.poll;
 import com.rbkmoney.damsel.event_stock.StockEvent;
 import com.rbkmoney.eventstock.client.EventConstraint;
 import com.rbkmoney.eventstock.client.EventFilter;
-import com.rbkmoney.thrift.filter.Filter;
+import com.rbkmoney.geck.filter.Filter;
 
 import java.time.Instant;
 

@@ -2,7 +2,7 @@ package com.rbkmoney.eventstock.client;
 
 import com.rbkmoney.damsel.event_stock.*;
 import com.rbkmoney.damsel.event_stock.EventRange;
-import com.rbkmoney.thrift.filter.converter.TemporalConverter;
+import com.rbkmoney.geck.common.util.TypeUtil;
 
 /**
  * Created by vpankrashkin on 21.04.17.
@@ -36,11 +36,11 @@ public class APIConversionUtil {
         EventTimeRange resTimeRange = new EventTimeRange();
 
         if (srcTimeRange.isFromDefined()) {
-            String timeStr = TemporalConverter.temporalToString(srcTimeRange.getFrom());
+            String timeStr = TypeUtil.temporalToString(srcTimeRange.getFrom());
             resTimeRange.setFromTime(srcTimeRange.isFromInclusive() ? EventTimeBound.inclusive(timeStr) : EventTimeBound.exclusive(timeStr));
         }
         if (srcTimeRange.isToDefined()) {
-            String timeStr = TemporalConverter.temporalToString(srcTimeRange.getTo());
+            String timeStr = TypeUtil.temporalToString(srcTimeRange.getTo());
             resTimeRange.setToTime(srcTimeRange.isToInclusive() ? EventTimeBound.inclusive(timeStr) : EventTimeBound.exclusive(timeStr));
         }
 
