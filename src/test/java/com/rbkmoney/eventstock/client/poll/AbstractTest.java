@@ -131,45 +131,6 @@ public class AbstractTest {
         }
     }
 
-    protected static Event createEvent(long id, boolean flag) {
-        String timeString =  TypeUtil.temporalToString(Instant.now());
-        Event event = flag ?
-                new Event(
-                        id,
-                        timeString,
-                        EventSource.invoice(""+id),
-                        0,
-                        EventPayload.invoice_event(
-                                InvoiceEvent.invoice_created(
-                                        new InvoiceCreated(
-                                                new Invoice(
-                                                        id+"",
-                                                        "kek_id",
-                                                        "1",
-                                                        "kek_time",
-                                                        InvoiceStatus.unpaid(new InvoiceUnpaid()),
-                                                        new InvoiceDetails("kek_product"),
-                                                        "kek_time",
-                                                        new Cash(100, new CurrencyRef("RUB"))
-                                                )
-                                        )
-                                )
-                        )
-                )
-                :
-                new Event(
-                        id,
-                        timeString,
-                        EventSource.invoice(""+(id-1)),
-                        0,
-                        EventPayload.invoice_event(
-                                InvoiceEvent.invoice_status_changed(
-                                        new InvoiceStatusChanged(
-                                                InvoiceStatus.unpaid(
-                                                        new InvoiceUnpaid())))));
-        return event;
-    }
-
     protected static List<StockEvent> createEvents(EventConstraint constraint, long expectedMax) {
         EventIDRange idRange = constraint.getEventRange().getIdRange();
         Long fromId = (Long) idRange.getFromId().getFieldValue();
@@ -188,7 +149,7 @@ public class AbstractTest {
                  ++i, ++counter) {
                 long id = i+fromId;
                 if (id <= expectedMax)
-                    list.add(new StockEvent(SourceEvent.processing_event(createEvent(id, id % 2 ==0))));
+                    list.add(new StockEvent(SourceEvent.processing_event(EventGenerator.createEvent(id, id % 2 ==0))));
             }
             return list;
         }
@@ -198,7 +159,7 @@ public class AbstractTest {
         com.rbkmoney.eventstock.client.EventRange eventRange = new com.rbkmoney.eventstock.client.EventConstraint.EventIDRange();
         eventRange.setFromInclusive(from);
         eventRange.setToExclusive(to);
-        Filter filter = !addFilter ? null : new PathConditionFilter(new PathConditionRule("payload.invoice_event.invoice_status_changed.status.unpaid", new IsNullCondition().not()));
+        Filter filter = !addFilter ? null : new PathConditionFilter(new PathConditionRule("payload.invoice_changes.invoice_status_changed.status.unpaid", new IsNullCondition().not()));
         EventFlowFilter eventFlowFilter = new EventFlowFilter(new com.rbkmoney.eventstock.client.EventConstraint(eventRange), filter);
         return eventFlowFilter;
     }

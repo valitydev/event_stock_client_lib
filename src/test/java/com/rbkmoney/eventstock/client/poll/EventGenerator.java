@@ -1,11 +1,16 @@
 package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.damsel.domain.*;
+import com.rbkmoney.damsel.domain.Invoice;
 import com.rbkmoney.damsel.event_stock.*;
 import com.rbkmoney.damsel.event_stock.EventRange;
 import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
+import com.rbkmoney.geck.serializer.kit.mock.MockMode;
+import com.rbkmoney.geck.serializer.kit.mock.MockTBaseProcessor;
+import com.rbkmoney.geck.serializer.kit.tbase.TBaseHandler;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
@@ -19,40 +24,26 @@ public class EventGenerator {
 
     public static Event createEvent(long id, boolean flag) {
         String timeString =  TypeUtil.temporalToString(Instant.now());
-        Event event = flag ?
-                new Event(
-                        id,
-                        timeString,
-                        EventSource.invoice(""+id),
-                        0,
-                        EventPayload.invoice_event(
-                                InvoiceEvent.invoice_created(
-                                        new InvoiceCreated(
-                                                new Invoice(
-                                                        id+"",
-                                                        "kek_id",
-                                                        "1",
-                                                        "kek_time",
-                                                        InvoiceStatus.unpaid(new InvoiceUnpaid()),
-                                                        new InvoiceDetails("kek_product"),
-                                                        "kek_time",
-                                                        new Cash(100, new CurrencyRef("RUB"))
-                                                )
-                                        )
-                                )
-                        )
-                )
-                :
-                new Event(
-                        id,
-                        timeString,
-                        EventSource.invoice(""+(id-1)),
-                        0,
-                        EventPayload.invoice_event(
-                                InvoiceEvent.invoice_status_changed(
-                                        new InvoiceStatusChanged(
-                                                InvoiceStatus.unpaid(
-                                                        new InvoiceUnpaid())))));
+        Event event = flag ? new Event(id, timeString, EventSource.invoice_id(""+id), EventPayload.invoice_changes(Arrays.asList(
+                InvoiceChange.invoice_created(new InvoiceCreated(new InvoiceCreated(new Invoice(
+                        id+"",
+                        "kek_id",
+                        "1",
+                        "kek_time",
+                        InvoiceStatus.unpaid(new InvoiceUnpaid()),
+                        new InvoiceDetails("kek_product"),
+                        "kek_time",
+                        new Cash(100, new CurrencyRef("RUB"))
+                ))))
+        ))) :new Event(id, timeString, EventSource.invoice_id(""+id), EventPayload.invoice_changes(Arrays.asList(
+                InvoiceChange.invoice_status_changed(new InvoiceStatusChanged(InvoiceStatus.unpaid(new InvoiceUnpaid())))
+        )));
+
+        try {
+            event = new MockTBaseProcessor(MockMode.REQUIRED_ONLY).process(event, new TBaseHandler<>(Event.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return event;
     }
 
