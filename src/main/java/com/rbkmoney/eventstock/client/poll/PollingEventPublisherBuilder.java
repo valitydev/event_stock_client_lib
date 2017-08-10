@@ -6,7 +6,6 @@ import com.rbkmoney.woody.api.ClientBuilder;
 import com.rbkmoney.woody.thrift.impl.http.THSpawnClientBuilder;
 
 import java.net.URI;
-import java.util.EventListener;
 import java.util.Objects;
 
 /**

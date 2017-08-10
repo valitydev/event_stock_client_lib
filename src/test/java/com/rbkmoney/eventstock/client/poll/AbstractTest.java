@@ -159,7 +159,7 @@ public class AbstractTest {
         com.rbkmoney.eventstock.client.EventRange eventRange = new com.rbkmoney.eventstock.client.EventConstraint.EventIDRange();
         eventRange.setFromInclusive(from);
         eventRange.setToExclusive(to);
-        Filter filter = !addFilter ? null : new PathConditionFilter(new PathConditionRule("payload.invoice_changes.invoice_status_changed.status.unpaid", new IsNullCondition().not()));
+        Filter filter = !addFilter ? null : new PathConditionFilter(new PathConditionRule("processing_event.payload.invoice_changes.invoice_status_changed.status.unpaid", new IsNullCondition().not()));
         EventFlowFilter eventFlowFilter = new EventFlowFilter(new com.rbkmoney.eventstock.client.EventConstraint(eventRange), filter);
         return eventFlowFilter;
     }

@@ -38,7 +38,7 @@ public class EventFlowFilter implements EventFilter<StockEvent> {
         Instant time = Instant.from(ValuesExtractor.getCreatedAt(stockEvent));
 
         if (eventConstraint.accept(id, time)) {
-            if (filter == null || filter.match(stockEvent.getSourceEvent().getProcessingEvent())) {
+            if (filter == null || filter.match(stockEvent.getSourceEvent())) {
                 return true;
             }
         }

@@ -134,6 +134,7 @@ public class ClientTest extends AbstractTest {
         eventPublisherBuilder.withEventHandler(new EHImpl(latch, receivedIdList));
         eventPublisherBuilder.withURI(new URI(getUrlString("/test")));
         eventPublisherBuilder.withMaxQuerySize(2);
+        eventPublisherBuilder.getClientBuilder().withNetworkTimeout(0);
 
         PollingEventPublisher<StockEvent> eventPublisher = eventPublisherBuilder.build();
 
