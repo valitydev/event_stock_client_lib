@@ -12,10 +12,10 @@
 
     <groupId>com.rbkmoney</groupId>
     <artifactId>eventstock-client</artifactId>
-    <version>1.1.3</version>
+    <version>1.1.4</version>
 
     <properties>
-        <geck.version>0.6.1</geck.version>
+        <geck.version>0.6.2</geck.version>
     </properties>
 
     <dependencies>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.21</version>
+            <version>1.7.25</version>
         </dependency>
         <!--Test libs-->
         <dependency>
