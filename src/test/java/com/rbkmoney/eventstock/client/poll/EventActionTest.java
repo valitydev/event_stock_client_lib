@@ -14,11 +14,13 @@ import java.util.function.BiConsumer;
 /**
  * Created by vpankrashkin on 07.06.17.
  */
-public class EventHandlerTest {
+public class EventActionTest {
+    final int eventRetryDelay = 1200;
     PollingEventPublisher<StockEvent> publisher;
     CountDownLatch latch;
     List<EventAction> mockReturns;
     List<StockEvent> acceptedEvents = new ArrayList<>();
+    List<Long> acceptedTime = new ArrayList<>();
 
     @Before
     public void setUp() {
@@ -26,6 +28,7 @@ public class EventHandlerTest {
         mockReturns = new ArrayList<EventAction>(){{
             add(EventAction.CONTINUE);
             add(EventAction.RETRY);
+            add(EventAction.DELAYED_RETRY);
             add(EventAction.INTERRUPT);
         }};
 
@@ -36,6 +39,7 @@ public class EventHandlerTest {
                             @Override
                             public EventAction handle(StockEvent event, String subsKey) {
                                 acceptedEvents.add(event);
+                                acceptedTime.add(System.currentTimeMillis());
                                 return mockReturns.get(counter.getAndIncrement());
                             }
 
@@ -54,11 +58,12 @@ public class EventHandlerTest {
                     return ErrorAction.INTERRUPT;
                 })
                 .withServiceAdapter(new EventGenerator.ServiceAdapterStub())
+                .withEventRetryDelay(eventRetryDelay)
                 .build();
     }
 
     @Test
-    public void test() throws InterruptedException {
+    public void testActions() throws InterruptedException {
         publisher.subscribe(new DefaultSubscriberConfig<>(
                 new EventFlowFilter(
                         new EventConstraint(
@@ -69,17 +74,22 @@ public class EventHandlerTest {
         StockEvent prevEvent = null;
         BiConsumer<StockEvent, StockEvent> noCheck = (p, c) -> {};
         BiConsumer<StockEvent, StockEvent> nextCheck = noCheck;
+        long prevHTime, hTime = 0;
         for (EventAction mockReturn: mockReturns) {
             StockEvent currEvent = acceptedEvents.remove(0);
+            prevHTime = hTime;
+            hTime = acceptedTime.remove(0);
             nextCheck.accept(prevEvent, currEvent);
             switch (mockReturn) {
                 case CONTINUE:
                     nextCheck = noCheck;
                     break;
                 case RETRY:
+                case DELAYED_RETRY:
                     nextCheck = (p, c) -> Assert.assertSame(p, c);
                     break;
                 case INTERRUPT:
+                    Assert.assertTrue(eventRetryDelay <= hTime - prevHTime);
                     nextCheck = (p, c) -> Assert.assertTrue(acceptedEvents.isEmpty());
                     break;
             }
@@ -87,7 +97,6 @@ public class EventHandlerTest {
         }
         nextCheck.accept(prevEvent, null);
         publisher.destroy();
-
     }
 
 }

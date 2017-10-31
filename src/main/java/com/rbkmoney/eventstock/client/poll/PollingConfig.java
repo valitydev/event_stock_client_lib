@@ -5,6 +5,8 @@ import com.rbkmoney.eventstock.client.EventFilter;
 import com.rbkmoney.eventstock.client.EventHandler;
 import com.rbkmoney.eventstock.client.SubscriberConfig;
 
+import java.util.Objects;
+
 /**
  * Created by vpankrashkin on 28.06.16.
  */
@@ -13,63 +15,66 @@ class PollingConfig<TEvent> implements SubscriberConfig<TEvent>{
     private final EventHandler<TEvent> eventHandler;
     private final ErrorHandler errorHandler;
     private final int maxQuerySize;
+    private final int eventRetryDelay;
 
     public static <TEvent> PollingConfig<TEvent> mergeConfig(PollingConfig<TEvent> mainConfig, PollingConfig<TEvent> defaultConfig) {
         EventFilter<TEvent> eventFilter = mainConfig.getEventFilter() != null ? mainConfig.getEventFilter() : defaultConfig.getEventFilter();
         EventHandler<TEvent> eventHandler = mainConfig.getEventHandler() != null ? mainConfig.getEventHandler() : defaultConfig.getEventHandler();
         ErrorHandler errorHandler = mainConfig.getErrorHandler() != null ? mainConfig.getErrorHandler() : defaultConfig.getErrorHandler();
         int maxQuerySize = mainConfig.getMaxQuerySize() > 0 ? mainConfig.getMaxQuerySize() : defaultConfig.getMaxQuerySize();
-        return new PollingConfig<>(eventFilter, eventHandler, errorHandler, maxQuerySize, true);
-    }
-
-    public PollingConfig(EventHandler<TEvent> eventHandler, ErrorHandler errorHandler, int maxQuerySize) {
-        this.eventFilter = null;
-        this.eventHandler = eventHandler;
-        this.errorHandler = errorHandler;
-        this.maxQuerySize = maxQuerySize;
+        int eventRetryDelay = mainConfig.getEventRetryDelay() > 0 ? mainConfig.getEventRetryDelay() : defaultConfig.getEventRetryDelay();
+        return new PollingConfig<>(eventFilter, eventHandler, errorHandler, maxQuerySize, eventRetryDelay, true);
     }
 
     public PollingConfig(SubscriberConfig<TEvent> subscriberConfig) {
-        this(subscriberConfig.getEventFilter(), subscriberConfig.getEventHandler(), subscriberConfig.getErrorHandler(), subscriberConfig.getMaxQuerySize());
+        this(subscriberConfig.getEventFilter(), subscriberConfig.getEventHandler(), subscriberConfig.getErrorHandler(), subscriberConfig.getMaxQuerySize(), subscriberConfig.getEventRetryDelay(), false);
     }
 
-    public PollingConfig(EventFilter<TEvent> eventFilter, EventHandler<TEvent> eventHandler, ErrorHandler errorHandler, int maxQuerySize) {
-        this(eventFilter, eventHandler, errorHandler, maxQuerySize, false);
+    public PollingConfig(EventFilter<TEvent> eventFilter, EventHandler<TEvent> eventHandler, ErrorHandler errorHandler, int maxQuerySize, int eventRetryDelay) {
+        this(eventFilter, eventHandler, errorHandler, maxQuerySize, eventRetryDelay,false);
     }
 
-    private PollingConfig(EventFilter<TEvent> eventFilter, EventHandler<TEvent> eventHandler, ErrorHandler errorHandler, int maxQuerySize, boolean strict) {
+    private PollingConfig(EventFilter<TEvent> eventFilter, EventHandler<TEvent> eventHandler, ErrorHandler errorHandler, int maxQuerySize, int eventRetryDelay, boolean strict) {
         if (strict) {
-            if (eventFilter == null) {
-                throw new NullPointerException("Filter cannot be null");
-            }
-            if (eventHandler == null) {
-                throw new NullPointerException("Event handler cannot be null");
-            }
-            if (errorHandler == null) {
-                throw new NullPointerException("Error handler cannot be null");
-            }
+            Objects.requireNonNull(eventFilter, "Filter cannot be null");
+            Objects.requireNonNull(eventHandler, "Event handler cannot be null");
+            Objects.requireNonNull(errorHandler, "Error handler cannot be null");
+        }
+
+        if (eventRetryDelay < 0) {
+            throw new IllegalArgumentException("Retry timeout cannot be negative");
         }
 
         this.eventFilter = eventFilter;
         this.eventHandler = eventHandler;
         this.errorHandler = errorHandler;
         this.maxQuerySize = maxQuerySize;
+        this.eventRetryDelay = eventRetryDelay;
     }
 
+    @Override
     public EventFilter<TEvent> getEventFilter() {
         return eventFilter;
     }
 
+    @Override
     public EventHandler<TEvent> getEventHandler() {
         return eventHandler;
     }
 
+    @Override
     public ErrorHandler getErrorHandler() {
         return errorHandler;
     }
 
+    @Override
     public int getMaxQuerySize() {
         return maxQuerySize;
+    }
+
+    @Override
+    public int getEventRetryDelay() {
+        return eventRetryDelay;
     }
 
     @Override
@@ -79,6 +84,7 @@ class PollingConfig<TEvent> implements SubscriberConfig<TEvent>{
                 ", eventHandler=" + eventHandler +
                 ", errorHandler=" + errorHandler +
                 ", maxQuerySize=" + maxQuerySize +
+                ", eventRetryDelay=" + eventRetryDelay +
                 '}';
     }
 }

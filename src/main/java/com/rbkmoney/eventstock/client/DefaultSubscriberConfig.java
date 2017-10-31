@@ -8,20 +8,22 @@ public class DefaultSubscriberConfig<TEvent> implements SubscriberConfig<TEvent>
     private final EventHandler<TEvent> handler;
     private final ErrorHandler errorHandler;
     private final int maxQuerySize;
+    private final int eventRetryDelay;
 
     public DefaultSubscriberConfig(EventFilter<TEvent> filter) {
         this(filter, null);
     }
 
     public DefaultSubscriberConfig(EventFilter<TEvent> filter, EventHandler<TEvent> handler) {
-        this(filter, handler, null, -1);
+        this(filter, handler, null, -1, 0);
     }
 
-    public DefaultSubscriberConfig(EventFilter<TEvent> filter, EventHandler<TEvent> handler, ErrorHandler errorHandler, int maxQuerySize) {
+    public DefaultSubscriberConfig(EventFilter<TEvent> filter, EventHandler<TEvent> handler, ErrorHandler errorHandler, int maxQuerySize, int eventRetryDelay) {
         this.filter = filter;
         this.handler = handler;
         this.errorHandler = errorHandler;
         this.maxQuerySize = maxQuerySize;
+        this.eventRetryDelay = eventRetryDelay;
     }
 
     @Override
@@ -42,5 +44,10 @@ public class DefaultSubscriberConfig<TEvent> implements SubscriberConfig<TEvent>
     @Override
     public int getMaxQuerySize() {
         return maxQuerySize;
+    }
+
+    @Override
+    public int getEventRetryDelay() {
+        return eventRetryDelay;
     }
 }

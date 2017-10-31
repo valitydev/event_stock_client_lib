@@ -23,8 +23,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by vpankrashkin on 28.06.16.
  */
 class Poller {
-    private static final int DEFAULT_MAX_POOL_SIZE = -1;
-    private static final int DEFAULT_MAX_POLL_DELAY = 1000;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final Map<String, Map.Entry<Future, PollingWorker>> pollers = new HashMap<>();
@@ -35,10 +33,6 @@ class Poller {
     private final int pollDelay;
     private final AtomicBoolean running = new AtomicBoolean(true);
 
-    public Poller(ServiceAdapter<StockEvent, EventConstraint> serviceAdapter, HandlerListener handlerListener) {
-        this(serviceAdapter, handlerListener, DEFAULT_MAX_POOL_SIZE, DEFAULT_MAX_POLL_DELAY);
-    }
-
     public Poller(ServiceAdapter<StockEvent, EventConstraint> serviceAdapter, HandlerListener handlerListener, int maxPoolSize, int pollDelay) {
         this.executorService = new ScheduledThreadPoolExecutor(1,
                 new ThreadFactory() {
@@ -47,7 +41,7 @@ class Poller {
 
                     @Override
                     public Thread newThread(Runnable r) {
-                        Thread t =  new Thread(threadGroup, r, "T" + counter.incrementAndGet());
+                        Thread t = new Thread(threadGroup, r, "T" + counter.incrementAndGet());
                         t.setDaemon(true);
                         return t;
                     }
@@ -95,7 +89,7 @@ class Poller {
     }
 
 
-        boolean directRemovePolling(String subsKey, boolean interrupted) {
+    boolean directRemovePolling(String subsKey, boolean interrupted) {
         PollingWorker worker = null;
         boolean removed = false;
         lock.lock();
@@ -112,10 +106,14 @@ class Poller {
         } finally {
             lock.unlock();
             if (worker != null) {
-                if (interrupted) {
-                    worker.getPollingConfig().getEventHandler().handleInterrupted(subsKey);
-                } else {
-                    worker.getPollingConfig().getEventHandler().handleCompleted(subsKey);
+                try {
+                    if (interrupted) {
+                        worker.getPollingConfig().getEventHandler().handleInterrupted(subsKey);
+                    } else {
+                        worker.getPollingConfig().getEventHandler().handleCompleted(subsKey);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Error raised while trying to unsubscribe: " + subsKey, e);
                 }
             }
             logTaskRemoval(removed, subsKey);

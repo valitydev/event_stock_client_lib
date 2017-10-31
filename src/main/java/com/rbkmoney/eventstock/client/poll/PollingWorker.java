@@ -201,7 +201,7 @@ class PollingWorker implements Runnable {
         running = false;
     }
 
-    private int processEvent(StockEvent event, int bindingId, Thread worker) {
+    private int processEvent(StockEvent event, int bindingId, Thread worker) throws Exception {
         int completionFlag = WORKING;
         EventHandler<StockEvent> eventHandler = pollingConfig.getEventHandler();
         handling:
@@ -221,6 +221,10 @@ class PollingWorker implements Runnable {
             switch (eventAction) {
                 case RETRY:
                     log.info("Handler requested retry on event: {}", event);
+                    continue handling;
+                case DELAYED_RETRY:
+                    log.info("Handler requested delayed retry on event: {}", event);
+                    Thread.sleep(pollingConfig.getEventRetryDelay());
                     continue handling;
                 case CONTINUE:
                     break handling;

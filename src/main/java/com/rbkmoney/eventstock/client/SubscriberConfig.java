@@ -8,4 +8,5 @@ public interface SubscriberConfig<TEvent> {
     EventHandler<TEvent> getEventHandler();
     ErrorHandler getErrorHandler();
     int getMaxQuerySize();
+    int getEventRetryDelay();
 }

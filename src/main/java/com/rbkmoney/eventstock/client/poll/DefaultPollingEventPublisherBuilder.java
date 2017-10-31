@@ -63,6 +63,7 @@ public class DefaultPollingEventPublisherBuilder {
     protected static final int DEFAULT_MAX_POOL_SIZE = 1;
 
     protected static final int DEFAULT_MAX_POLL_DELAY = 1000;
+    protected static final int DEFAULT_EVENT_RETRY_DELAY = 1000;
 
     private EventHandler eventHandler;
     private ErrorHandler errorHandler;
@@ -71,6 +72,7 @@ public class DefaultPollingEventPublisherBuilder {
     private int maxQuerySize = DEFAULT_MAX_QUERY_SIZE;
     private int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
     private int pollDelay = DEFAULT_MAX_POLL_DELAY;
+    private int eventRetryDelay = DEFAULT_EVENT_RETRY_DELAY;
 
     public HandlerListener getHandlerListener() {
         if (handlerListener == null) {
@@ -97,6 +99,10 @@ public class DefaultPollingEventPublisherBuilder {
 
     public int getPollDelay() {
         return pollDelay;
+    }
+
+    public int getEventRetryDelay() {
+        return eventRetryDelay;
     }
 
     public DefaultPollingEventPublisherBuilder withHandlerListener(HandlerListener handlerListener) {
@@ -132,9 +138,17 @@ public class DefaultPollingEventPublisherBuilder {
 
     public DefaultPollingEventPublisherBuilder withPollDelay(int pollingDelayMs) {
         if (pollingDelayMs < 0) {
-            throw new IllegalArgumentException("Poll delay must be > 0");
+            throw new IllegalArgumentException("Poll delay must be >= 0");
         }
         this.pollDelay = pollingDelayMs;
+        return this;
+    }
+
+    public DefaultPollingEventPublisherBuilder withEventRetryDelay(int eventRetryDelayMs) {
+        if (eventRetryDelayMs < 0) {
+            throw new IllegalArgumentException("Event retry delay must be >= 0");
+        }
+        this.eventRetryDelay = eventRetryDelayMs;
         return this;
     }
 
@@ -166,7 +180,7 @@ public class DefaultPollingEventPublisherBuilder {
         eventHandler = eventHandler == null ? DEFAULT_EVENT_HANDLER : eventHandler;
         ErrorHandler errorHandler = getErrorHandler();
         errorHandler = errorHandler == null ? DEFAULT_ERROR_HANDLER : errorHandler;
-        PollingConfig<StockEvent> pollingConfig = new PollingConfig<>(eventHandler, errorHandler, getMaxQuerySize());
+        PollingConfig<StockEvent> pollingConfig = new PollingConfig<>(null, eventHandler, errorHandler, getMaxQuerySize(), getEventRetryDelay());
         PollingEventPublisher eventPublisher = new PollingEventPublisher(pollingConfig, poller);
         return eventPublisher;
     }
