@@ -122,7 +122,7 @@ class PollingWorker implements Runnable {
                                     log.error("Event handling was interrupted, [break]");
                                     break;
                                 } else {
-                                    log.error("Error during handling event: [" + event + "]", t);
+                                    log.warn("Error during handling event: [" + event + "]", t);
                                 }
                             }
                         }

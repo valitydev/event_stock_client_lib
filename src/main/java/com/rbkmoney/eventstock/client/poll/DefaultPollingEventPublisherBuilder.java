@@ -36,7 +36,7 @@ public class DefaultPollingEventPublisherBuilder {
 
         @Override
         public ErrorAction handleError(String subsKey, Throwable errCause) {
-            log.error("Subscription error, retry: " + subsKey, errCause);
+            log.warn("Subscription error, retry: " + subsKey, errCause);
             return ErrorAction.RETRY;
         }
     };
