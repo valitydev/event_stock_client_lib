@@ -12,10 +12,10 @@
 
     <groupId>com.rbkmoney</groupId>
     <artifactId>eventstock-client</artifactId>
-    <version>1.1.9</version>
+    <version>1.2.0</version>
 
     <properties>
-        <geck.version>0.6.4</geck.version>
+        <geck.version>0.6.9</geck.version>
     </properties>
 
     <dependencies>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>damsel</artifactId>
-            <version>1.182-7aaee14</version>
+            <version>1.236-1510cd7</version>
             <scope>provided</scope>
         </dependency>
         <!--Thirdparty libs-->

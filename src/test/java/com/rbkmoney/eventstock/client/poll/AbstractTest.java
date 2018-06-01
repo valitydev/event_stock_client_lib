@@ -1,10 +1,7 @@
 package com.rbkmoney.eventstock.client.poll;
 
-import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.event_stock.*;
-import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.eventstock.client.EventFilter;
-import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.geck.filter.Filter;
 import com.rbkmoney.geck.filter.PathConditionFilter;
 import com.rbkmoney.geck.filter.condition.IsNullCondition;
@@ -33,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.Servlet;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +56,7 @@ public class AbstractTest {
         server.setHandler(contextHandlerCollection);
 
         server.start();
-        serverPort = ((NetworkConnector)server.getConnectors()[0]).getLocalPort();
+        serverPort = ((NetworkConnector) server.getConnectors()[0]).getLocalPort();
     }
 
     protected void addServlet(Servlet servlet, String mapping) {
@@ -104,7 +100,9 @@ public class AbstractTest {
 
     protected <T> Servlet createThrftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener) {
         THServiceBuilder serviceBuilder = new THServiceBuilder();
-        serviceBuilder.withEventListener(eventListener);
+        if (eventListener != null) {
+            serviceBuilder.withEventListener(eventListener);
+        }
         return serviceBuilder.build(iface, handler);
     }
 
@@ -123,8 +121,12 @@ public class AbstractTest {
             THClientBuilder clientBuilder = new THClientBuilder();
             clientBuilder.withAddress(new URI(url));
             clientBuilder.withHttpClient(HttpClientBuilder.create().build());
-            clientBuilder.withIdGenerator(idGenerator);
-            clientBuilder.withEventListener(eventListener);
+            if (idGenerator != null) {
+                clientBuilder.withIdGenerator(idGenerator);
+            }
+            if (eventListener != null) {
+                clientBuilder.withEventListener(eventListener);
+            }
             return clientBuilder.build(iface);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
@@ -145,11 +147,11 @@ public class AbstractTest {
         } else {
             List list = new ArrayList();
             for (long i = (constraint.getEventRange().getIdRange().getFromId().isSetInclusive() ? 0 : 1), counter = 0;
-                 counter < limit && i+fromId <= (Optional.of(constraint).map(EventConstraint::getEventRange).map(com.rbkmoney.damsel.event_stock.EventRange::getIdRange).map(EventIDRange::getToId).map(EventIDBound::isSetInclusive).orElse(false) ? toId : toId-1);
+                 counter < limit && i + fromId <= (Optional.of(constraint).map(EventConstraint::getEventRange).map(com.rbkmoney.damsel.event_stock.EventRange::getIdRange).map(EventIDRange::getToId).map(EventIDBound::isSetInclusive).orElse(false) ? toId : toId - 1);
                  ++i, ++counter) {
-                long id = i+fromId;
+                long id = i + fromId;
                 if (id <= expectedMax)
-                    list.add(new StockEvent(SourceEvent.processing_event(EventGenerator.createEvent(id, id % 2 ==0))));
+                    list.add(new StockEvent(SourceEvent.processing_event(EventGenerator.createEvent(id, id % 2 == 0))));
             }
             return list;
         }

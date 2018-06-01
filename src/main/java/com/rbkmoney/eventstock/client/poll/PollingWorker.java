@@ -140,6 +140,9 @@ class PollingWorker implements Runnable {
                         }
                     }
 
+                } catch (UnsupportedByServiceException e) {
+                    log.error("Service adapter doesn't support required operation", e);
+                    completionFlag = HANDLER_INTERRUPTION;
                 } catch (ServiceException e) {
                     if (e.getCause() instanceof DatasetTooBig) {
                         DatasetTooBig dtbEx = (DatasetTooBig) e.getCause();

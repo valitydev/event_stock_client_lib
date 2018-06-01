@@ -78,8 +78,11 @@ public class PollingEventPublisherBuilder extends DefaultPollingEventPublisherBu
     }
 
     protected ServiceAdapter createServiceAdapter() {
-        ClientBuilder clientBuilder = getClientBuilder();
-        return new ESServiceAdapter(clientBuilder.build(EventRepositorySrv.Iface.class));
+        return createServiceAdapter(getClientBuilder());
+    }
+
+    protected ServiceAdapter createServiceAdapter(ClientBuilder clientBuilder) {
+        return ESServiceAdapter.build(clientBuilder);
     }
 
 }
