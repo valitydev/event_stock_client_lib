@@ -12,7 +12,7 @@
 
     <groupId>com.rbkmoney</groupId>
     <artifactId>eventstock-client</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
 
     <properties>
         <geck.version>0.6.9</geck.version>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.rbkmoney.woody</groupId>
             <artifactId>woody-thrift</artifactId>
-            <version>1.1.12</version>
+            <version>1.1.15</version>
         </dependency>
         <dependency>
             <groupId>com.rbkmoney.geck</groupId>
