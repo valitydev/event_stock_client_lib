@@ -173,14 +173,14 @@ public class DefaultPollingEventPublisherBuilder {
         throw new UnsupportedOperationException("Cannot create ServiceAdapter");
     }
 
-    public PollingEventPublisher<StockEvent> build() {
+    public <T> PollingEventPublisher<T> build() {
         ServiceAdapter adapter = getServiceAdapter();
         Poller poller = new Poller(adapter, getHandlerListener(), getMaxPoolSize(), getPollDelay());
         EventHandler eventHandler = getEventHandler();
         eventHandler = eventHandler == null ? DEFAULT_EVENT_HANDLER : eventHandler;
         ErrorHandler errorHandler = getErrorHandler();
         errorHandler = errorHandler == null ? DEFAULT_ERROR_HANDLER : errorHandler;
-        PollingConfig<StockEvent> pollingConfig = new PollingConfig<>(null, eventHandler, errorHandler, getMaxQuerySize(), getEventRetryDelay());
+        PollingConfig<T> pollingConfig = new PollingConfig<>(null, eventHandler, errorHandler, getMaxQuerySize(), getEventRetryDelay());
         PollingEventPublisher eventPublisher = new PollingEventPublisher(pollingConfig, poller);
         return eventPublisher;
     }

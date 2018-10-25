@@ -12,7 +12,7 @@
 
     <groupId>com.rbkmoney</groupId>
     <artifactId>eventstock-client</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
 
     <properties>
         <geck.version>0.6.9</geck.version>
@@ -38,7 +38,13 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>damsel</artifactId>
-            <version>1.236-1510cd7</version>
+            <version>1.265-192ba01</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.rbkmoney</groupId>
+            <artifactId>fistful-proto</artifactId>
+            <version>1.4-728a362</version>
             <scope>provided</scope>
         </dependency>
         <!--Thirdparty libs-->
