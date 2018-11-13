@@ -74,6 +74,21 @@ public class FistfulPollingEventPublisherBuilder extends DefaultPollingEventPubl
         return this;
     }
 
+    public FistfulPollingEventPublisherBuilder withDepositServiceAdapter() {
+        this.serviceAdapterType = ServiceAdapterType.DEPOSIT;
+        return this;
+    }
+
+    public FistfulPollingEventPublisherBuilder withSourceServiceAdapter() {
+        this.serviceAdapterType = ServiceAdapterType.SOURCE;
+        return this;
+    }
+
+    public FistfulPollingEventPublisherBuilder withDestinationServiceAdapter() {
+        this.serviceAdapterType = ServiceAdapterType.DESTINATION;
+        return this;
+    }
+
     protected ClientBuilder getClientBuilder() {
         if (clientBuilder == null) {
             clientBuilder = new THSpawnClientBuilder().withAddress(uri);
@@ -102,6 +117,12 @@ public class FistfulPollingEventPublisherBuilder extends DefaultPollingEventPubl
                 return FistfulServiceAdapter.buildWalletAdapter(clientBuilder);
             case IDENTITY:
                 return FistfulServiceAdapter.buildIdentityAdapter(clientBuilder);
+            case DEPOSIT:
+                return FistfulServiceAdapter.buildDepositAdapter(clientBuilder);
+            case SOURCE:
+                return FistfulServiceAdapter.buildSourceAdapter(clientBuilder);
+            case DESTINATION:
+                return FistfulServiceAdapter.buildDestinationAdapter(clientBuilder);
             default:
                 throw new IllegalArgumentException("Unknown service adapter type");
         }
@@ -110,7 +131,10 @@ public class FistfulPollingEventPublisherBuilder extends DefaultPollingEventPubl
     public enum ServiceAdapterType {
         IDENTITY,
         WITHDRAWAL,
-        WALLET
+        WALLET,
+        DEPOSIT,
+        SOURCE,
+        DESTINATION
     }
 
 }

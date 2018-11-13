@@ -77,4 +77,71 @@ public class FistfulEventGenerator {
         return sinkEvent;
     }
 
+    public static com.rbkmoney.fistful.deposit.SinkEvent createDepositEvent(long id) {
+        String timeString = TypeUtil.temporalToString(Instant.now());
+        com.rbkmoney.fistful.deposit.SinkEvent sinkEvent = new com.rbkmoney.fistful.deposit.SinkEvent();
+        sinkEvent.setId(id);
+        sinkEvent.setCreatedAt(timeString);
+        sinkEvent.setPayload(
+                new com.rbkmoney.fistful.deposit.Event(
+                        1,
+                        timeString,
+                        Arrays.asList(
+                                com.rbkmoney.fistful.deposit.Change.created(new com.rbkmoney.fistful.deposit.Deposit())
+                        )
+                )
+        );
+        try {
+            sinkEvent = new MockTBaseProcessor(MockMode.REQUIRED_ONLY).process(sinkEvent, new TBaseHandler<>(com.rbkmoney.fistful.deposit.SinkEvent.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return sinkEvent;
+    }
+
+
+    public static com.rbkmoney.fistful.source.SinkEvent createSourceEvent(long id) {
+        String timeString = TypeUtil.temporalToString(Instant.now());
+        com.rbkmoney.fistful.source.SinkEvent sinkEvent = new com.rbkmoney.fistful.source.SinkEvent();
+        sinkEvent.setId(id);
+        sinkEvent.setCreatedAt(timeString);
+        sinkEvent.setPayload(
+                new com.rbkmoney.fistful.source.Event(
+                        1,
+                        timeString,
+                        Arrays.asList(
+                                com.rbkmoney.fistful.source.Change.created(new com.rbkmoney.fistful.source.Source())
+                        )
+                )
+        );
+        try {
+            sinkEvent = new MockTBaseProcessor(MockMode.REQUIRED_ONLY).process(sinkEvent, new TBaseHandler<>(com.rbkmoney.fistful.source.SinkEvent.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return sinkEvent;
+    }
+
+    public static com.rbkmoney.fistful.destination.SinkEvent createDestinationEvent(long id) {
+        String timeString = TypeUtil.temporalToString(Instant.now());
+        com.rbkmoney.fistful.destination.SinkEvent sinkEvent = new com.rbkmoney.fistful.destination.SinkEvent();
+        sinkEvent.setId(id);
+        sinkEvent.setCreatedAt(timeString);
+        sinkEvent.setPayload(
+                new com.rbkmoney.fistful.destination.Event(
+                        1,
+                        timeString,
+                        Arrays.asList(
+                                com.rbkmoney.fistful.destination.Change.destination(new com.rbkmoney.fistful.destination.Destination())
+                        )
+                )
+        );
+        try {
+            sinkEvent = new MockTBaseProcessor(MockMode.REQUIRED_ONLY).process(sinkEvent, new TBaseHandler<>(com.rbkmoney.fistful.destination.SinkEvent.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return sinkEvent;
+    }
+
 }
