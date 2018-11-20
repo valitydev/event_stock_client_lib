@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.Objects;
 
 public class FistfulPollingEventPublisherBuilder extends DefaultPollingEventPublisherBuilder {
+
     private static final int DEFAULT_HOUSEKEEPER_TIMEOUT = 1000;
 
     private URI uri;
@@ -89,6 +90,11 @@ public class FistfulPollingEventPublisherBuilder extends DefaultPollingEventPubl
         return this;
     }
 
+    public FistfulPollingEventPublisherBuilder withWithdrawalSessionServiceAdapter() {
+        this.serviceAdapterType = ServiceAdapterType.WITHDRAWAL_SESSION;
+        return this;
+    }
+
     protected ClientBuilder getClientBuilder() {
         if (clientBuilder == null) {
             clientBuilder = new THSpawnClientBuilder().withAddress(uri);
@@ -123,6 +129,8 @@ public class FistfulPollingEventPublisherBuilder extends DefaultPollingEventPubl
                 return FistfulServiceAdapter.buildSourceAdapter(clientBuilder);
             case DESTINATION:
                 return FistfulServiceAdapter.buildDestinationAdapter(clientBuilder);
+            case WITHDRAWAL_SESSION:
+                return FistfulServiceAdapter.buildWithdrawalSessionAdapter(clientBuilder);
             default:
                 throw new IllegalArgumentException("Unknown service adapter type");
         }
@@ -134,7 +142,8 @@ public class FistfulPollingEventPublisherBuilder extends DefaultPollingEventPubl
         WALLET,
         DEPOSIT,
         SOURCE,
-        DESTINATION
+        DESTINATION,
+        WITHDRAWAL_SESSION
     }
 
 }

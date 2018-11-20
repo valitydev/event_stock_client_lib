@@ -1,12 +1,10 @@
 package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.eventstock.client.EventConstraint;
+import com.rbkmoney.eventstock.client.poll.repositories.*;
 import com.rbkmoney.fistful.eventsink.EventRange;
 import com.rbkmoney.fistful.eventsink.NoLastEvent;
-import com.rbkmoney.fistful.withdrawal.SinkEvent;
-import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.woody.api.ClientBuilder;
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,160 +15,39 @@ import java.util.List;
 public class FistfulServiceAdapter<TEvent> implements ServiceAdapter<TEvent, EventConstraint> {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     private final FistfulRepository<TEvent> repository;
-
-    public static FistfulServiceAdapter<com.rbkmoney.fistful.withdrawal.SinkEvent> buildWithdrawalAdapter(ClientBuilder clientBuilder) {
-        com.rbkmoney.fistful.withdrawal.EventSinkSrv.Iface client = clientBuilder.build(com.rbkmoney.fistful.withdrawal.EventSinkSrv.Iface.class);
-        return new FistfulServiceAdapter<>(new FistfulRepository<com.rbkmoney.fistful.withdrawal.SinkEvent>() {
-            @Override
-            public List<com.rbkmoney.fistful.withdrawal.SinkEvent> getEvents(EventRange eventRange) throws TException {
-                return client.getEvents(eventRange);
-            }
-
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return client.getLastEventID();
-            }
-
-            @Override
-            public Long getEventId(SinkEvent sinkEvent) {
-                return sinkEvent.getId();
-            }
-
-            @Override
-            public TemporalAccessor getEventCreatedAt(SinkEvent sinkEvent) {
-                return TypeUtil.stringToTemporal(sinkEvent.getCreatedAt());
-            }
-        });
-    }
-
-    public static FistfulServiceAdapter<com.rbkmoney.fistful.identity.SinkEvent> buildIdentityAdapter(ClientBuilder clientBuilder) {
-        com.rbkmoney.fistful.identity.EventSinkSrv.Iface client = clientBuilder.build(com.rbkmoney.fistful.identity.EventSinkSrv.Iface.class);
-        return new FistfulServiceAdapter<>(new FistfulRepository<com.rbkmoney.fistful.identity.SinkEvent>() {
-            @Override
-            public List<com.rbkmoney.fistful.identity.SinkEvent> getEvents(EventRange eventRange) throws TException {
-                return client.getEvents(eventRange);
-            }
-
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return client.getLastEventID();
-            }
-
-            @Override
-            public Long getEventId(com.rbkmoney.fistful.identity.SinkEvent sinkEvent) {
-                return sinkEvent.getId();
-            }
-
-            @Override
-            public TemporalAccessor getEventCreatedAt(com.rbkmoney.fistful.identity.SinkEvent sinkEvent) {
-                return TypeUtil.stringToTemporal(sinkEvent.getCreatedAt());
-            }
-        });
-    }
-
-    public static FistfulServiceAdapter<com.rbkmoney.fistful.wallet.SinkEvent> buildWalletAdapter(ClientBuilder clientBuilder) {
-        com.rbkmoney.fistful.wallet.EventSinkSrv.Iface client = clientBuilder.build(com.rbkmoney.fistful.wallet.EventSinkSrv.Iface.class);
-        return new FistfulServiceAdapter<>(new FistfulRepository<com.rbkmoney.fistful.wallet.SinkEvent>() {
-            @Override
-            public List<com.rbkmoney.fistful.wallet.SinkEvent> getEvents(EventRange eventRange) throws TException {
-                return client.getEvents(eventRange);
-            }
-
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return client.getLastEventID();
-            }
-
-            @Override
-            public Long getEventId(com.rbkmoney.fistful.wallet.SinkEvent sinkEvent) {
-                return sinkEvent.getId();
-            }
-
-            @Override
-            public TemporalAccessor getEventCreatedAt(com.rbkmoney.fistful.wallet.SinkEvent sinkEvent) {
-                return TypeUtil.stringToTemporal(sinkEvent.getCreatedAt());
-            }
-        });
-    }
-
-    public static FistfulServiceAdapter<com.rbkmoney.fistful.deposit.SinkEvent> buildDepositAdapter(ClientBuilder clientBuilder) {
-        com.rbkmoney.fistful.deposit.EventSinkSrv.Iface client = clientBuilder.build(com.rbkmoney.fistful.deposit.EventSinkSrv.Iface.class);
-        return new FistfulServiceAdapter<>(new FistfulRepository<com.rbkmoney.fistful.deposit.SinkEvent>() {
-            @Override
-            public List<com.rbkmoney.fistful.deposit.SinkEvent> getEvents(EventRange eventRange) throws TException {
-                return client.getEvents(eventRange);
-            }
-
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return client.getLastEventID();
-            }
-
-            @Override
-            public Long getEventId(com.rbkmoney.fistful.deposit.SinkEvent sinkEvent) {
-                return sinkEvent.getId();
-            }
-
-            @Override
-            public TemporalAccessor getEventCreatedAt(com.rbkmoney.fistful.deposit.SinkEvent sinkEvent) {
-                return TypeUtil.stringToTemporal(sinkEvent.getCreatedAt());
-            }
-        });
-    }
-
-    public static FistfulServiceAdapter<com.rbkmoney.fistful.destination.SinkEvent> buildDestinationAdapter(ClientBuilder clientBuilder) {
-        com.rbkmoney.fistful.destination.EventSinkSrv.Iface client = clientBuilder.build(com.rbkmoney.fistful.destination.EventSinkSrv.Iface.class);
-        return new FistfulServiceAdapter<>(new FistfulRepository<com.rbkmoney.fistful.destination.SinkEvent>() {
-            @Override
-            public List<com.rbkmoney.fistful.destination.SinkEvent> getEvents(EventRange eventRange) throws TException {
-                return client.getEvents(eventRange);
-            }
-
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return client.getLastEventID();
-            }
-
-            @Override
-            public Long getEventId(com.rbkmoney.fistful.destination.SinkEvent sinkEvent) {
-                return sinkEvent.getId();
-            }
-
-            @Override
-            public TemporalAccessor getEventCreatedAt(com.rbkmoney.fistful.destination.SinkEvent sinkEvent) {
-                return TypeUtil.stringToTemporal(sinkEvent.getCreatedAt());
-            }
-        });
-    }
-
-    public static FistfulServiceAdapter<com.rbkmoney.fistful.source.SinkEvent> buildSourceAdapter(ClientBuilder clientBuilder) {
-        com.rbkmoney.fistful.source.EventSinkSrv.Iface client = clientBuilder.build(com.rbkmoney.fistful.source.EventSinkSrv.Iface.class);
-        return new FistfulServiceAdapter<>(new FistfulRepository<com.rbkmoney.fistful.source.SinkEvent>() {
-            @Override
-            public List<com.rbkmoney.fistful.source.SinkEvent> getEvents(EventRange eventRange) throws TException {
-                return client.getEvents(eventRange);
-            }
-
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return client.getLastEventID();
-            }
-
-            @Override
-            public Long getEventId(com.rbkmoney.fistful.source.SinkEvent sinkEvent) {
-                return sinkEvent.getId();
-            }
-
-            @Override
-            public TemporalAccessor getEventCreatedAt(com.rbkmoney.fistful.source.SinkEvent sinkEvent) {
-                return TypeUtil.stringToTemporal(sinkEvent.getCreatedAt());
-            }
-        });
-    }
 
     private FistfulServiceAdapter(FistfulRepository<TEvent> repository) {
         this.repository = repository;
+    }
+
+    public static FistfulServiceAdapter<com.rbkmoney.fistful.withdrawal.SinkEvent> buildWithdrawalAdapter(ClientBuilder clientBuilder) {
+		return new FistfulServiceAdapter<>(new WithdrawalFistfulRepository(clientBuilder));
+	}
+
+    public static FistfulServiceAdapter<com.rbkmoney.fistful.identity.SinkEvent> buildIdentityAdapter(ClientBuilder clientBuilder) {
+        return new FistfulServiceAdapter<>(new IdentityFistfulRepository(clientBuilder));
+    }
+
+    public static FistfulServiceAdapter<com.rbkmoney.fistful.wallet.SinkEvent> buildWalletAdapter(ClientBuilder clientBuilder) {
+        return new FistfulServiceAdapter<>(new WalletFistfulRepository(clientBuilder));
+    }
+
+    public static FistfulServiceAdapter<com.rbkmoney.fistful.deposit.SinkEvent> buildDepositAdapter(ClientBuilder clientBuilder) {
+        return new FistfulServiceAdapter<>(new DepositFistfulRepository(clientBuilder));
+    }
+
+    public static FistfulServiceAdapter<com.rbkmoney.fistful.destination.SinkEvent> buildDestinationAdapter(ClientBuilder clientBuilder) {
+        return new FistfulServiceAdapter<>(new DestinationFistfulRepository(clientBuilder));
+    }
+
+    public static FistfulServiceAdapter<com.rbkmoney.fistful.source.SinkEvent> buildSourceAdapter(ClientBuilder clientBuilder) {
+        return new FistfulServiceAdapter<>(new SourceFistfulRepository(clientBuilder));
+    }
+
+    public static FistfulServiceAdapter<com.rbkmoney.fistful.withdrawal_session.SinkEvent> buildWithdrawalSessionAdapter(ClientBuilder clientBuilder) {
+        return new FistfulServiceAdapter<>(new WithdrawalSessionFistfulRepository(clientBuilder));
     }
 
     @Override

@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.rbkmoney</groupId>
         <artifactId>eventstock-client</artifactId>
-        <version>1.2.4</version>
+        <version>1.2.5</version>
     </parent>
 
     <groupId>com.rbkmoney</groupId>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>fistful-proto</artifactId>
-            <version>1.5-cd93749</version>
+            <version>1.8-37ccefb</version>
             <scope>provided</scope>
         </dependency>
         <!--Test-->

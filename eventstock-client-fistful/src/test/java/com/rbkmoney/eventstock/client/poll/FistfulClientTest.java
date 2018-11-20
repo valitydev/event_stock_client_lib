@@ -2,26 +2,28 @@ package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.eventstock.client.DefaultSubscriberConfig;
 import com.rbkmoney.eventstock.client.EventAction;
-import com.rbkmoney.eventstock.client.EventConstraint;
-import com.rbkmoney.eventstock.client.EventFilter;
-import com.rbkmoney.fistful.eventsink.EventRange;
-import com.rbkmoney.fistful.eventsink.NoLastEvent;
-import com.rbkmoney.geck.filter.Filter;
-import com.rbkmoney.woody.api.ClientBuilder;
-import org.apache.thrift.TException;
+import com.rbkmoney.eventstock.client.poll.additional.deposit.DepositEventFilter;
+import com.rbkmoney.eventstock.client.poll.additional.deposit.DepositEventSinkSrv;
+import com.rbkmoney.eventstock.client.poll.additional.destination.DestinationEventFilter;
+import com.rbkmoney.eventstock.client.poll.additional.destination.DestinationEventSinkSrv;
+import com.rbkmoney.eventstock.client.poll.additional.identity.IdentityEventFilter;
+import com.rbkmoney.eventstock.client.poll.additional.identity.IdentityEventSinkSrv;
+import com.rbkmoney.eventstock.client.poll.additional.source.SourceEventFilter;
+import com.rbkmoney.eventstock.client.poll.additional.source.SourceEventSinkSrv;
+import com.rbkmoney.eventstock.client.poll.additional.wallet.WalletEventFilter;
+import com.rbkmoney.eventstock.client.poll.additional.wallet.WalletEventSinkSrv;
+import com.rbkmoney.eventstock.client.poll.additional.withdrawal.WithdrawalEventFilter;
+import com.rbkmoney.eventstock.client.poll.additional.withdrawal.WithdrawalEventSinkSrv;
+import com.rbkmoney.eventstock.client.poll.additional.withdrawal_session.WithdrawalSessionEventFilter;
+import com.rbkmoney.eventstock.client.poll.additional.withdrawal_session.WithdrawalSessionEventSinkSrv;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.servlet.Servlet;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.temporal.TemporalAccessor;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class FistfulClientTest extends AbstractTest {
 
@@ -29,55 +31,23 @@ public class FistfulClientTest extends AbstractTest {
     public void testWalletServiceAdapter() throws URISyntaxException, InterruptedException {
         Semaphore semaphore = new Semaphore(-1);
         AtomicLong lastId = new AtomicLong(-1);
+        String path = "/wallet";
 
-        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.wallet.EventSinkSrv.Iface.class, new com.rbkmoney.fistful.wallet.EventSinkSrv.Iface() {
-            @Override
-            public List<com.rbkmoney.fistful.wallet.SinkEvent> getEvents(EventRange range) throws TException {
-                if (range.getAfter() == -1) {
-                    return IntStream.range(0, 3).mapToObj(i -> FistfulEventGenerator.createWalletEvent(i)).collect(Collectors.toList());
-                } else {
-                    semaphore.release(1);
-                    return Collections.emptyList();
-                }
-            }
+        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.wallet.EventSinkSrv.Iface.class,
+                new WalletEventSinkSrv(semaphore), null);
+        addServlet(srv, path);
 
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return 0;
-            }
-        }, null);
-
-        addServlet(srv, "/wallet");
-
-        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder().withWalletServiceAdapter();
-        builder.withURI(new URI(getUrlString("/wallet")));
+        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder();
+        builder.withWalletServiceAdapter();
+        builder.withURI(new URI(getUrlString(path)));
         PollingEventPublisher publisher = builder.build();
-        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new EventFilter<com.rbkmoney.fistful.wallet.SinkEvent>() {
-            @Override
-            public EventConstraint getEventConstraint() {
-                EventConstraint.EventIDRange range = new EventConstraint.EventIDRange();
-                range.setFromNow();
-                return new EventConstraint(range);
-            }
 
-            @Override
-            public Filter getFilter() {
-                return null;
-            }
-
-            @Override
-            public int getLimit() {
-                return 1;
-            }
-
-            @Override
-            public boolean accept(Long eventId, TemporalAccessor createdAt, com.rbkmoney.fistful.wallet.SinkEvent o) {
-                return true;
-            }
-        }, (e, k) -> {
-            lastId.set(e.getId());
-            return EventAction.CONTINUE;
-        });
+        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new WalletEventFilter(),
+                (e, k) ->
+                {
+                    lastId.set(e.getId());
+                    return EventAction.CONTINUE;
+                });
 
         publisher.subscribe(config);
         semaphore.acquire(1);
@@ -89,55 +59,23 @@ public class FistfulClientTest extends AbstractTest {
     public void testIdentityServiceAdapter() throws URISyntaxException, InterruptedException {
         Semaphore semaphore = new Semaphore(-1);
         AtomicLong lastId = new AtomicLong(-1);
+        String path = "/identity";
 
-        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.identity.EventSinkSrv.Iface.class, new com.rbkmoney.fistful.identity.EventSinkSrv.Iface() {
-            @Override
-            public List<com.rbkmoney.fistful.identity.SinkEvent> getEvents(EventRange range) throws TException {
-                if (range.getAfter() == -1) {
-                    return IntStream.range(0, 3).mapToObj(i -> FistfulEventGenerator.createIdentityEvent(i)).collect(Collectors.toList());
-                } else {
-                    semaphore.release(1);
-                    return Collections.emptyList();
-                }
-            }
+        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.identity.EventSinkSrv.Iface.class,
+                new IdentityEventSinkSrv(semaphore), null);
+        addServlet(srv, path);
 
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return 0;
-            }
-        }, null);
-
-        addServlet(srv, "/identity");
-
-        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder().withIdentityServiceAdapter();
-        builder.withURI(new URI(getUrlString("/identity")));
+        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder();
+        builder.withIdentityServiceAdapter();
+        builder.withURI(new URI(getUrlString(path)));
         PollingEventPublisher publisher = builder.build();
-        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new EventFilter<com.rbkmoney.fistful.identity.SinkEvent>() {
-            @Override
-            public EventConstraint getEventConstraint() {
-                EventConstraint.EventIDRange range = new EventConstraint.EventIDRange();
-                range.setFromNow();
-                return new EventConstraint(range);
-            }
 
-            @Override
-            public Filter getFilter() {
-                return null;
-            }
-
-            @Override
-            public int getLimit() {
-                return 1;
-            }
-
-            @Override
-            public boolean accept(Long eventId, TemporalAccessor createdAt, com.rbkmoney.fistful.identity.SinkEvent o) {
-                return true;
-            }
-        }, (e, k) -> {
-            lastId.set(e.getId());
-            return EventAction.CONTINUE;
-        });
+        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new IdentityEventFilter(),
+                (e, k) ->
+                {
+                    lastId.set(e.getId());
+                    return EventAction.CONTINUE;
+                });
 
         publisher.subscribe(config);
         semaphore.acquire(1);
@@ -149,55 +87,23 @@ public class FistfulClientTest extends AbstractTest {
     public void testWithdrawalServiceAdapter() throws URISyntaxException, InterruptedException {
         Semaphore semaphore = new Semaphore(-1);
         AtomicLong lastId = new AtomicLong(-1);
+        String path = "/withdrawal";
 
-        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.withdrawal.EventSinkSrv.Iface.class, new com.rbkmoney.fistful.withdrawal.EventSinkSrv.Iface() {
-            @Override
-            public List<com.rbkmoney.fistful.withdrawal.SinkEvent> getEvents(EventRange range) throws TException {
-                if (range.getAfter() == -1) {
-                    return IntStream.range(0, 3).mapToObj(i -> FistfulEventGenerator.createWithdrawalEvent(i)).collect(Collectors.toList());
-                } else {
-                    semaphore.release(1);
-                    return Collections.emptyList();
-                }
-            }
+        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.withdrawal.EventSinkSrv.Iface.class,
+                new WithdrawalEventSinkSrv(semaphore), null);
+        addServlet(srv, path);
 
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return 0;
-            }
-        }, null);
-
-        addServlet(srv, "/withdrawal");
-
-        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder().withWithdrawalServiceAdapter();
-        builder.withURI(new URI(getUrlString("/withdrawal")));
+        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder();
+        builder.withWithdrawalServiceAdapter();
+        builder.withURI(new URI(getUrlString(path)));
         PollingEventPublisher publisher = builder.build();
-        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new EventFilter<com.rbkmoney.fistful.withdrawal.SinkEvent>() {
-            @Override
-            public EventConstraint getEventConstraint() {
-                EventConstraint.EventIDRange range = new EventConstraint.EventIDRange();
-                range.setFromNow();
-                return new EventConstraint(range);
-            }
 
-            @Override
-            public Filter getFilter() {
-                return null;
-            }
-
-            @Override
-            public int getLimit() {
-                return 1;
-            }
-
-            @Override
-            public boolean accept(Long eventId, TemporalAccessor createdAt, com.rbkmoney.fistful.withdrawal.SinkEvent o) {
-                return true;
-            }
-        }, (e, k) -> {
-            lastId.set(e.getId());
-            return EventAction.CONTINUE;
-        });
+        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new WithdrawalEventFilter(),
+                (e, k) ->
+                {
+                    lastId.set(e.getId());
+                    return EventAction.CONTINUE;
+                });
 
         publisher.subscribe(config);
         semaphore.acquire(1);
@@ -209,55 +115,23 @@ public class FistfulClientTest extends AbstractTest {
     public void testDepositServiceAdapter() throws URISyntaxException, InterruptedException {
         Semaphore semaphore = new Semaphore(-1);
         AtomicLong lastId = new AtomicLong(-1);
+        String path = "/deposit";
 
-        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.deposit.EventSinkSrv.Iface.class, new com.rbkmoney.fistful.deposit.EventSinkSrv.Iface() {
-            @Override
-            public List<com.rbkmoney.fistful.deposit.SinkEvent> getEvents(EventRange range) throws TException {
-                if (range.getAfter() == -1) {
-                    return IntStream.range(0, 3).mapToObj(i -> FistfulEventGenerator.createDepositEvent(i)).collect(Collectors.toList());
-                } else {
-                    semaphore.release(1);
-                    return Collections.emptyList();
-                }
-            }
+        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.deposit.EventSinkSrv.Iface.class,
+                new DepositEventSinkSrv(semaphore), null);
+        addServlet(srv, path);
 
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return 0;
-            }
-        }, null);
-
-        addServlet(srv, "/deposit");
-
-        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder().withDepositServiceAdapter();
-        builder.withURI(new URI(getUrlString("/deposit")));
+        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder();
+        builder.withDepositServiceAdapter();
+        builder.withURI(new URI(getUrlString(path)));
         PollingEventPublisher publisher = builder.build();
-        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new EventFilter<com.rbkmoney.fistful.deposit.SinkEvent>() {
-            @Override
-            public EventConstraint getEventConstraint() {
-                EventConstraint.EventIDRange range = new EventConstraint.EventIDRange();
-                range.setFromNow();
-                return new EventConstraint(range);
-            }
 
-            @Override
-            public Filter getFilter() {
-                return null;
-            }
-
-            @Override
-            public int getLimit() {
-                return 1;
-            }
-
-            @Override
-            public boolean accept(Long eventId, TemporalAccessor createdAt, com.rbkmoney.fistful.deposit.SinkEvent o) {
-                return true;
-            }
-        }, (e, k) -> {
-            lastId.set(e.getId());
-            return EventAction.CONTINUE;
-        });
+        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new DepositEventFilter(),
+                (e, k) ->
+                {
+                    lastId.set(e.getId());
+                    return EventAction.CONTINUE;
+                });
 
         publisher.subscribe(config);
         semaphore.acquire(1);
@@ -269,55 +143,23 @@ public class FistfulClientTest extends AbstractTest {
     public void testSourceServiceAdapter() throws URISyntaxException, InterruptedException {
         Semaphore semaphore = new Semaphore(-1);
         AtomicLong lastId = new AtomicLong(-1);
+        String path = "/source";
 
-        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.source.EventSinkSrv.Iface.class, new com.rbkmoney.fistful.source.EventSinkSrv.Iface() {
-            @Override
-            public List<com.rbkmoney.fistful.source.SinkEvent> getEvents(EventRange range) throws TException {
-                if (range.getAfter() == -1) {
-                    return IntStream.range(0, 3).mapToObj(i -> FistfulEventGenerator.createSourceEvent(i)).collect(Collectors.toList());
-                } else {
-                    semaphore.release(1);
-                    return Collections.emptyList();
-                }
-            }
+        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.source.EventSinkSrv.Iface.class,
+                new SourceEventSinkSrv(semaphore), null);
+        addServlet(srv, path);
 
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return 0;
-            }
-        }, null);
-
-        addServlet(srv, "/source");
-
-        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder().withSourceServiceAdapter();
-        builder.withURI(new URI(getUrlString("/source")));
+        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder();
+        builder.withSourceServiceAdapter();
+        builder.withURI(new URI(getUrlString(path)));
         PollingEventPublisher publisher = builder.build();
-        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new EventFilter<com.rbkmoney.fistful.source.SinkEvent>() {
-            @Override
-            public EventConstraint getEventConstraint() {
-                EventConstraint.EventIDRange range = new EventConstraint.EventIDRange();
-                range.setFromNow();
-                return new EventConstraint(range);
-            }
 
-            @Override
-            public Filter getFilter() {
-                return null;
-            }
-
-            @Override
-            public int getLimit() {
-                return 1;
-            }
-
-            @Override
-            public boolean accept(Long eventId, TemporalAccessor createdAt, com.rbkmoney.fistful.source.SinkEvent o) {
-                return true;
-            }
-        }, (e, k) -> {
-            lastId.set(e.getId());
-            return EventAction.CONTINUE;
-        });
+        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new SourceEventFilter(),
+                (e, k) ->
+                {
+                    lastId.set(e.getId());
+                    return EventAction.CONTINUE;
+                });
 
         publisher.subscribe(config);
         semaphore.acquire(1);
@@ -329,55 +171,53 @@ public class FistfulClientTest extends AbstractTest {
     public void testDestinationServiceAdapter() throws URISyntaxException, InterruptedException {
         Semaphore semaphore = new Semaphore(-1);
         AtomicLong lastId = new AtomicLong(-1);
+        String path = "/destination";
 
-        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.destination.EventSinkSrv.Iface.class, new com.rbkmoney.fistful.destination.EventSinkSrv.Iface() {
-            @Override
-            public List<com.rbkmoney.fistful.destination.SinkEvent> getEvents(EventRange range) throws TException {
-                if (range.getAfter() == -1) {
-                    return IntStream.range(0, 3).mapToObj(i -> FistfulEventGenerator.createDestinationEvent(i)).collect(Collectors.toList());
-                } else {
-                    semaphore.release(1);
-                    return Collections.emptyList();
-                }
-            }
+        DestinationEventSinkSrv destinationEventSinkSrv = new DestinationEventSinkSrv(semaphore);
+        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.destination.EventSinkSrv.Iface.class,
+                destinationEventSinkSrv, null);
 
-            @Override
-            public long getLastEventID() throws NoLastEvent, TException {
-                return 0;
-            }
-        }, null);
+        addServlet(srv, path);
 
-        addServlet(srv, "/destination");
-
-        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder().withDestinationServiceAdapter();
-        builder.withURI(new URI(getUrlString("/destination")));
+        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder();
+        builder.withDestinationServiceAdapter();
+        builder.withURI(new URI(getUrlString(path)));
         PollingEventPublisher publisher = builder.build();
-        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new EventFilter<com.rbkmoney.fistful.destination.SinkEvent>() {
-            @Override
-            public EventConstraint getEventConstraint() {
-                EventConstraint.EventIDRange range = new EventConstraint.EventIDRange();
-                range.setFromNow();
-                return new EventConstraint(range);
-            }
+        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new DestinationEventFilter(),
+                (e, k) ->
+                {
+                    lastId.set(e.getId());
+                    return EventAction.CONTINUE;
+                });
 
-            @Override
-            public Filter getFilter() {
-                return null;
-            }
+        publisher.subscribe(config);
+        semaphore.acquire(1);
+        Assert.assertEquals(2, lastId.get());
+        publisher.destroy();
+    }
 
-            @Override
-            public int getLimit() {
-                return 1;
-            }
+    @Test
+    public void testWithdrawalSessionServiceAdapter() throws URISyntaxException, InterruptedException {
+        Semaphore semaphore = new Semaphore(-1);
+        AtomicLong lastId = new AtomicLong(-1);
+        String path = "/withdrawal_session";
 
-            @Override
-            public boolean accept(Long eventId, TemporalAccessor createdAt, com.rbkmoney.fistful.destination.SinkEvent o) {
-                return true;
-            }
-        }, (e, k) -> {
-            lastId.set(e.getId());
-            return EventAction.CONTINUE;
-        });
+        WithdrawalSessionEventSinkSrv iface = new WithdrawalSessionEventSinkSrv(semaphore);
+        Servlet srv = createThrftRPCService(com.rbkmoney.fistful.withdrawal_session.EventSinkSrv.Iface.class,
+                iface, null);
+        addServlet(srv, path);
+
+        FistfulPollingEventPublisherBuilder builder = new FistfulPollingEventPublisherBuilder();
+        builder.withWithdrawalSessionServiceAdapter();
+        builder.withURI(new URI(getUrlString(path)));
+        PollingEventPublisher publisher = builder.build();
+
+        DefaultSubscriberConfig config = new DefaultSubscriberConfig<>(new WithdrawalSessionEventFilter(),
+                (e, k) ->
+                {
+                    lastId.set(e.getId());
+                    return EventAction.CONTINUE;
+                });
 
         publisher.subscribe(config);
         semaphore.acquire(1);
