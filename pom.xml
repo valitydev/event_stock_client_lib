@@ -25,6 +25,7 @@
         <module>eventstock-client-core</module>
         <module>eventstock-client-damsel</module>
         <module>eventstock-client-fistful</module>
+        <module>eventstock-client-xrates</module>
     </modules>
 
     <dependencyManagement>
