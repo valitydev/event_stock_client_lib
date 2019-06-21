@@ -17,10 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * Created by vpankrashkin on 28.06.16.
- */
 class Poller<TEvent> {
+
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final Map<String, Map.Entry<Future, PollingWorker>> pollers = new HashMap<>();
@@ -31,19 +29,28 @@ class Poller<TEvent> {
     private final int pollDelay;
     private final AtomicBoolean running = new AtomicBoolean(true);
 
-    public Poller(ServiceAdapter<TEvent, EventConstraint> serviceAdapter, HandlerListener handlerListener, int maxPoolSize, int pollDelay) {
-        this.executorService = new ScheduledThreadPoolExecutor(1,
-                new ThreadFactory() {
-                    AtomicInteger counter = new AtomicInteger();
-                    ThreadGroup threadGroup = new ThreadGroup("ESCPollerPool");
+    public Poller(ServiceAdapter<TEvent, EventConstraint> serviceAdapter,
+                  HandlerListener handlerListener,
+                  int maxPoolSize,
+                  int pollDelay,
+                  String pollerName) {
+        ThreadFactory threadFactory = new ThreadFactory() {
 
-                    @Override
-                    public Thread newThread(Runnable r) {
-                        Thread t = new Thread(threadGroup, r, "T" + counter.incrementAndGet());
-                        t.setDaemon(true);
-                        return t;
-                    }
-                });
+            AtomicInteger counter = new AtomicInteger();
+            ThreadGroup threadGroup = new ThreadGroup("ESCPollerPool");
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(
+                        threadGroup,
+                        r,
+                        pollerName == null ? "poller-" + counter.incrementAndGet() : pollerName
+                );
+                t.setDaemon(true);
+                return t;
+            }
+        };
+        this.executorService = new ScheduledThreadPoolExecutor(1, threadFactory);
         executorService.setRemoveOnCancelPolicy(true);
         if (maxPoolSize > 0) {
             executorService.setMaximumPoolSize(maxPoolSize);
@@ -182,6 +189,5 @@ class Poller<TEvent> {
             //log.warn("Task not removed: {}", subsKey);
         }
     }
-
 
 }

@@ -6,11 +6,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
-/**
- * Created by vpankrashkin on 29.06.16.
- */
 public class DefaultPollingEventPublisherBuilder {
+
     protected static final EventHandler DEFAULT_EVENT_HANDLER = new EventHandler() {
+
         private final Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Override
@@ -31,6 +30,7 @@ public class DefaultPollingEventPublisherBuilder {
     };
 
     protected static final ErrorHandler DEFAULT_ERROR_HANDLER = new ErrorHandler() {
+
         private final Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Override
@@ -41,6 +41,7 @@ public class DefaultPollingEventPublisherBuilder {
     };
 
     private static final HandlerListener DEFAULT_HANDLER_LISTENER = new HandlerListener() {
+
         @Override
         public void beforeHandle(int bindingId, Object event, String subsKey) {
         }
@@ -77,6 +78,7 @@ public class DefaultPollingEventPublisherBuilder {
     private int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
     private int pollDelay = DEFAULT_MAX_POLL_DELAY;
     private int eventRetryDelay = DEFAULT_EVENT_RETRY_DELAY;
+    private String pollerName;
 
     public HandlerListener getHandlerListener() {
         if (handlerListener == null) {
@@ -162,6 +164,15 @@ public class DefaultPollingEventPublisherBuilder {
         return this;
     }
 
+    public DefaultPollingEventPublisherBuilder withPollerName(String pollerName) {
+        this.pollerName = pollerName;
+        return this;
+    }
+
+    public String getPollerName() {
+        return pollerName;
+    }
+
     public ServiceAdapter getServiceAdapter() {
         if (serviceAdapter == null) {
             serviceAdapter = createServiceAdapter();
@@ -179,7 +190,7 @@ public class DefaultPollingEventPublisherBuilder {
 
     public <T> PollingEventPublisher<T> build() {
         ServiceAdapter adapter = getServiceAdapter();
-        Poller poller = new Poller(adapter, getHandlerListener(), getMaxPoolSize(), getPollDelay());
+        Poller poller = new Poller(adapter, getHandlerListener(), getMaxPoolSize(), getPollDelay(), pollerName);
         EventHandler eventHandler = getEventHandler();
         eventHandler = eventHandler == null ? DEFAULT_EVENT_HANDLER : eventHandler;
         ErrorHandler errorHandler = getErrorHandler();
