@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.rbkmoney</groupId>
         <artifactId>eventstock-client</artifactId>
-        <version>1.2.7</version>
+        <version>1.2.8</version>
     </parent>
 
     <groupId>com.rbkmoney</groupId>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>xrates-proto</artifactId>
-            <version>1.2-08fd47f</version>
+            <version>1.7-5587fa8</version>
             <scope>provided</scope>
         </dependency>
 
