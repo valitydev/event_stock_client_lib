@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.rbkmoney</groupId>
         <artifactId>eventstock-client</artifactId>
-        <version>1.2.8</version>
+        <version>1.2.9</version>
     </parent>
 
     <groupId>com.rbkmoney</groupId>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>damsel</artifactId>
-            <version>1.265-192ba01</version>
+            <version>1.411-c31db04</version>
             <scope>provided</scope>
         </dependency>
         <!--Test-->

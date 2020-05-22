@@ -8,6 +8,6 @@ build('event_stock_client', 'docker-host') {
         javaLibPipeline = load("build_utils/jenkins_lib/pipeJavaLib.groovy")
     }
 
-    def buildImageTag = "7372dc01bf066b5b26be13d6de0c7bed70648a26"
+    def buildImageTag = "fcf116dd775cc2e91bffb6a36835754e3f2d5321"
     javaLibPipeline(buildImageTag)
 }

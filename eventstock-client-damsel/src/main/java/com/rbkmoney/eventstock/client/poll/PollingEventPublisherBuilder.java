@@ -67,6 +67,11 @@ public class PollingEventPublisherBuilder extends DefaultPollingEventPublisherBu
         return this;
     }
 
+    public PollingEventPublisherBuilder withPayoutServiceAdapter() {
+        this.serviceAdapterType = ServiceAdapterType.PAYOUT;
+        return this;
+    }
+
     public PollingEventPublisherBuilder withPPServiceAdapter() {
         this.serviceAdapterType = ServiceAdapterType.PP;
         return this;
@@ -96,6 +101,8 @@ public class PollingEventPublisherBuilder extends DefaultPollingEventPublisherBu
         switch (serviceAdapterType) {
             case ES:
                 return ESServiceAdapter.build(clientBuilder);
+            case PAYOUT:
+                return PayoutServiceAdapter.build(clientBuilder);
             case PP:
                 return PPServiceAdapter.build(clientBuilder);
             default:
@@ -105,6 +112,7 @@ public class PollingEventPublisherBuilder extends DefaultPollingEventPublisherBu
 
     public enum ServiceAdapterType {
         ES,
+        PAYOUT,
         PP
     }
 
