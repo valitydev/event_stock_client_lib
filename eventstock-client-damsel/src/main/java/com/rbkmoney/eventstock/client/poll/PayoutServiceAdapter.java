@@ -118,11 +118,7 @@ public class PayoutServiceAdapter implements ServiceAdapter<Event, EventConstrai
         EventRange resIdRange = new EventRange();
 
         if (srcIdRange.isFromDefined()) {
-            if(srcIdRange.isFromInclusive()) {
-                if (srcIdRange.getFrom() > Long.MIN_VALUE) {
-                    resIdRange.setAfter(srcIdRange.getFrom() - 1);//Based on Andrew confirmation that mg doesn't conform to api (no exception thrown on unknown event). Otherwise it's not possible to get specific event by id if preceding gap exists
-                }
-            } else {
+            if (!srcIdRange.isFromInclusive()) {
                 resIdRange.setAfter(srcIdRange.getFrom());
             }
         }
