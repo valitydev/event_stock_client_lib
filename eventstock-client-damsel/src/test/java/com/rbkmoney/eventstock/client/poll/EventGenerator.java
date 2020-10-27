@@ -1,9 +1,9 @@
 package com.rbkmoney.eventstock.client.poll;
 
-import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.domain.Invoice;
-import com.rbkmoney.damsel.event_stock.*;
+import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.event_stock.EventRange;
+import com.rbkmoney.damsel.event_stock.*;
 import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.geck.serializer.kit.mock.MockMode;
@@ -14,9 +14,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
-/**
- * Created by vpankrashkin on 07.06.17.
- */
 public class EventGenerator {
     public static StockEvent createStockEvent(long id, boolean flag) {
         return new StockEvent(SourceEvent.processing_event(createEvent(id, flag)));

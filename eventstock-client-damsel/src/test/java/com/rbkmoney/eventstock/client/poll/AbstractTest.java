@@ -36,9 +36,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Created by vpankrashkin on 06.05.16.
- */
 public class AbstractTest {
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 

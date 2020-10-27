@@ -2,9 +2,6 @@ package com.rbkmoney.eventstock.client;
 
 import org.slf4j.MDC;
 
-/**
- * Created by vpankrashkin on 20.08.16.
- */
 public class LogSupport {
     public static final String SUBSCRIPTION_KEY = "es_subscription_key";
 

@@ -7,10 +7,7 @@ import com.rbkmoney.eventstock.client.SubscriberConfig;
 
 import java.util.Objects;
 
-/**
- * Created by vpankrashkin on 28.06.16.
- */
-class PollingConfig<TEvent> implements SubscriberConfig<TEvent>{
+class PollingConfig<TEvent> implements SubscriberConfig<TEvent> {
     private final EventFilter<TEvent> eventFilter;
     private final EventHandler<TEvent> eventHandler;
     private final ErrorHandler errorHandler;
@@ -31,7 +28,7 @@ class PollingConfig<TEvent> implements SubscriberConfig<TEvent>{
     }
 
     public PollingConfig(EventFilter<TEvent> eventFilter, EventHandler<TEvent> eventHandler, ErrorHandler errorHandler, int maxQuerySize, int eventRetryDelay) {
-        this(eventFilter, eventHandler, errorHandler, maxQuerySize, eventRetryDelay,false);
+        this(eventFilter, eventHandler, errorHandler, maxQuerySize, eventRetryDelay, false);
     }
 
     private PollingConfig(EventFilter<TEvent> eventFilter, EventHandler<TEvent> eventHandler, ErrorHandler errorHandler, int maxQuerySize, int eventRetryDelay, boolean strict) {

@@ -19,9 +19,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static java.lang.System.out;
 
-/**
- * Created by vpankrashkin on 07.06.17.
- */
 @Ignore
 public class PerformanceTest {
     @Test

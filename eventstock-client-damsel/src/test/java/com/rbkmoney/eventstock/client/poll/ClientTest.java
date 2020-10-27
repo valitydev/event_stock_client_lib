@@ -1,10 +1,12 @@
 package com.rbkmoney.eventstock.client.poll;
 
-import com.rbkmoney.damsel.event_stock.EventConstraint;
 import com.rbkmoney.damsel.base.InvalidRequest;
 import com.rbkmoney.damsel.event_stock.*;
-import com.rbkmoney.damsel.payment_processing.*;
-import com.rbkmoney.eventstock.client.*;
+import com.rbkmoney.damsel.payment_processing.NoLastEvent;
+import com.rbkmoney.eventstock.client.DefaultSubscriberConfig;
+import com.rbkmoney.eventstock.client.EventAction;
+import com.rbkmoney.eventstock.client.EventFilter;
+import com.rbkmoney.eventstock.client.EventHandler;
 import com.rbkmoney.woody.api.event.ServiceEvent;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.trace.MetadataProperties;
@@ -17,19 +19,19 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 
-/**
- * Created by vpankrashkin on 29.06.16.
- */
 public class ClientTest extends AbstractTest {
     private static final Logger log = LoggerFactory.getLogger(ClientTest.class);
+
     private class ERSImpl implements EventRepositorySrv.Iface {
-        final  Long lastEventId = 0L;
+        final Long lastEventId = 0L;
         final Long firstEventId = 0L;
         private long expectedMax = Long.MAX_VALUE;
         private AtomicInteger rangeRequestsCount = new AtomicInteger();
@@ -67,9 +69,11 @@ public class ClientTest extends AbstractTest {
         public int getRangeRequestsCount() {
             return rangeRequestsCount.get();
         }
-    };
+    }
 
-     class EHImpl implements EventHandler<StockEvent> {
+    ;
+
+    class EHImpl implements EventHandler<StockEvent> {
         private CountDownLatch latch;
         private Collection eventIds;
 
@@ -83,19 +87,20 @@ public class ClientTest extends AbstractTest {
 
         @Override
         public EventAction handle(StockEvent event, String subsKey) {
-            log.info(subsKey+":Handled object: "+event);
+            log.info(subsKey + ":Handled object: " + event);
             if (eventIds != null)
-            eventIds.add(((StockEvent) event).getSourceEvent().getProcessingEvent().getId());
+                eventIds.add(((StockEvent) event).getSourceEvent().getProcessingEvent().getId());
             return EventAction.CONTINUE;
         }
 
         @Override
         public void handleCompleted(String subsKey) {
-            log.info(subsKey+":No more elements");
+            log.info(subsKey + ":No more elements");
             if (latch != null)
-            latch.countDown();
+                latch.countDown();
         }
     }
+
     @Test
     public void testLimitedRange() throws URISyntaxException, InterruptedException {
         final List<Long> receivedIdList = new ArrayList<>();
@@ -118,7 +123,7 @@ public class ClientTest extends AbstractTest {
         latch.await();
 
         Assert.assertArrayEquals(LongStream.range(0, 10).toArray(), receivedIdList.stream().mapToLong(i -> i).toArray());
-        Assert.assertEquals("5 requests return 2 records each, 10 in total, last request to check its over after previous full result", 5+1, ers.getRangeRequestsCount());
+        Assert.assertEquals("5 requests return 2 records each, 10 in total, last request to check its over after previous full result", 5 + 1, ers.getRangeRequestsCount());
         eventPublisher.destroy();
     }
 
@@ -144,7 +149,7 @@ public class ClientTest extends AbstractTest {
         latch.await();
 
         Assert.assertEquals(5, receivedIdList.size());
-        Assert.assertEquals("5 requests return 2 records each, 10 in total, last request to check its over after previous full result", 5+1, ers.getRangeRequestsCount());
+        Assert.assertEquals("5 requests return 2 records each, 10 in total, last request to check its over after previous full result", 5 + 1, ers.getRangeRequestsCount());
         eventPublisher.destroy();
     }
 
@@ -167,7 +172,7 @@ public class ClientTest extends AbstractTest {
         eventPublisher.subscribe(new DefaultSubscriberConfig<>(createEventFilter(0L, null, false)));
 
         Assert.assertFalse(latch.await(5, TimeUnit.SECONDS));
-        Assert.assertArrayEquals(LongStream.range(0, maxEventId+1).toArray(), receivedIdList.stream().mapToLong(i -> i).toArray());
+        Assert.assertArrayEquals(LongStream.range(0, maxEventId + 1).toArray(), receivedIdList.stream().mapToLong(i -> i).toArray());
 
         Assert.assertTrue("2 requests to exhaust store, next requests're empty ", ers.getRangeRequestsCount() > 4);
         eventPublisher.destroy();
@@ -219,7 +224,7 @@ public class ClientTest extends AbstractTest {
         eventPublisher.subscribe(new DefaultSubscriberConfig<>(eventFilter));
 
         Assert.assertFalse(latch.await(5, TimeUnit.SECONDS));
-        Assert.assertArrayEquals("maxEventId+1 -> 1(because last request that its exhausted)", LongStream.range(ers.lastEventId, maxEventId+1).toArray(), receivedIdList.stream().mapToLong(i -> i).toArray());
+        Assert.assertArrayEquals("maxEventId+1 -> 1(because last request that its exhausted)", LongStream.range(ers.lastEventId, maxEventId + 1).toArray(), receivedIdList.stream().mapToLong(i -> i).toArray());
 
         Assert.assertTrue(ers.getRangeRequestsCount() > 7);
         eventPublisher.destroy();

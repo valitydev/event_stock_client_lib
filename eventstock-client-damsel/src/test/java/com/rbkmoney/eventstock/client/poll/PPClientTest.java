@@ -1,13 +1,13 @@
 package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.damsel.base.InvalidRequest;
-import com.rbkmoney.damsel.event_stock.SourceEvent;
 import com.rbkmoney.damsel.event_stock.StockEvent;
 import com.rbkmoney.damsel.payment_processing.*;
-import com.rbkmoney.damsel.payment_processing.EventRange;
-import com.rbkmoney.eventstock.client.*;
+import com.rbkmoney.eventstock.client.DefaultSubscriberConfig;
+import com.rbkmoney.eventstock.client.EventAction;
+import com.rbkmoney.eventstock.client.EventConstraint;
+import com.rbkmoney.eventstock.client.EventFilter;
 import com.rbkmoney.geck.filter.Filter;
-import com.rbkmoney.woody.api.ClientBuilder;
 import org.apache.thrift.TException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -23,9 +23,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- * Created by vpankrashkin on 01.06.18.
- */
 public class PPClientTest extends AbstractTest {
 
     @Test
@@ -77,8 +74,10 @@ public class PPClientTest extends AbstractTest {
             public boolean accept(Long id, TemporalAccessor createdAt, Object o) {
                 return true;
             }
-        }, (e, k) -> {lastId.set(e.getId());
-        return EventAction.CONTINUE;});
+        }, (e, k) -> {
+            lastId.set(e.getId());
+            return EventAction.CONTINUE;
+        });
 
         publisher.subscribe(config);
         semaphore.acquire(1);

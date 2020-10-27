@@ -5,19 +5,42 @@
     <parent>
         <groupId>com.rbkmoney</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.5</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.rbkmoney</groupId>
     <artifactId>eventstock-client</artifactId>
-    <version>1.2.10</version>
+    <version>1.2.11</version>
     <packaging>pom</packaging>
 
+    <name>Event stock client lib</name>
+    <description>Bustermaze java client library for handy interaction</description>
+    <url>https://github.com/rbkmoney/event_stock_client_lib</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <organization>RBK.money</organization>
+            <organizationUrl>https://rbk.money</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/rbkmoney/event_stock_client_lib.git</connection>
+        <developerConnection>scm:git:ssh://github.com/rbkmoney/event_stock_client_lib.git</developerConnection>
+        <url>https://github.com/rbkmoney/event_stock_client_lib/tree/master</url>
+    </scm>
+
     <properties>
-        <woody.version>1.1.15</woody.version>
-        <geck.version>0.6.9</geck.version>
+        <woody.version>[1.1.22,)</woody.version>
+        <geck.version>0.6.11</geck.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -62,19 +85,19 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-quickstart</artifactId>
-                <version>9.3.9.M1</version>
+                <version>9.4.32.v20200930</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.11</version>
+                <version>4.13.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-library</artifactId>
-                <version>1.3</version>
+                <version>2.2</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

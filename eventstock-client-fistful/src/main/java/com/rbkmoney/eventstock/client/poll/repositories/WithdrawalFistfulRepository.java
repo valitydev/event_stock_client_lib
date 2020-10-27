@@ -13,30 +13,30 @@ import java.util.List;
 
 public class WithdrawalFistfulRepository implements FistfulRepository<SinkEvent> {
 
-	private final Iface client;
+    private final Iface client;
 
-	public WithdrawalFistfulRepository(ClientBuilder clientBuilder) {
-		client = clientBuilder.build(Iface.class);
-	}
+    public WithdrawalFistfulRepository(ClientBuilder clientBuilder) {
+        client = clientBuilder.build(Iface.class);
+    }
 
-	@Override
-	public List<SinkEvent> getEvents(EventRange eventRange) throws TException {
-		return client.getEvents(eventRange);
-	}
+    @Override
+    public List<SinkEvent> getEvents(EventRange eventRange) throws TException {
+        return client.getEvents(eventRange);
+    }
 
-	@Override
-	public long getLastEventID() throws TException {
-		return client.getLastEventID();
-	}
+    @Override
+    public long getLastEventID() throws TException {
+        return client.getLastEventID();
+    }
 
-	@Override
-	public Long getEventId(SinkEvent sinkEvent) {
-		return sinkEvent.getId();
-	}
+    @Override
+    public Long getEventId(SinkEvent sinkEvent) {
+        return sinkEvent.getId();
+    }
 
-	@Override
-	public TemporalAccessor getEventCreatedAt(SinkEvent sinkEvent) {
-		return TypeUtil.stringToTemporal(sinkEvent.getCreatedAt());
-	}
+    @Override
+    public TemporalAccessor getEventCreatedAt(SinkEvent sinkEvent) {
+        return TypeUtil.stringToTemporal(sinkEvent.getCreatedAt());
+    }
 
 }

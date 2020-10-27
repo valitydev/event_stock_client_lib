@@ -1,8 +1,5 @@
 package com.rbkmoney.eventstock.client.poll;
 
-/**
- * Created by vpankrashkin on 28.06.16.
- */
 public class UnsupportedByServiceException extends ServiceException {
     public UnsupportedByServiceException() {
         super();

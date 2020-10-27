@@ -1,5 +1,5 @@
 #!groovy
-build('event_stock_client', 'docker-host') {
+build('event_stock_client_lib', 'docker-host') {
     checkoutRepo()
     loadBuildUtils()
 

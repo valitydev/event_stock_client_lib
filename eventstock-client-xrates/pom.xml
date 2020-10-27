@@ -7,10 +7,9 @@
     <parent>
         <groupId>com.rbkmoney</groupId>
         <artifactId>eventstock-client</artifactId>
-        <version>1.2.10</version>
+        <version>1.2.11</version>
     </parent>
 
-    <groupId>com.rbkmoney</groupId>
     <artifactId>eventstock-client-xrates</artifactId>
     <packaging>jar</packaging>
 
@@ -23,7 +22,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>xrates-proto</artifactId>
-            <version>1.7-5587fa8</version>
+            <version>1.12-fb862b0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -31,7 +30,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.4</version>
+            <version>1.18.14</version>
             <scope>provided</scope>
         </dependency>
 

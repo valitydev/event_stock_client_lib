@@ -9,9 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.time.temporal.TemporalAccessor;
 import java.util.Collection;
 
-/**
- * Created by vpankrashkin on 29.06.16.
- */
 public class ESServiceAdapter implements ServiceAdapter<StockEvent, com.rbkmoney.eventstock.client.EventConstraint> {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final EventRepositorySrv.Iface repository;

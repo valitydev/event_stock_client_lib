@@ -1,14 +1,12 @@
 package com.rbkmoney.eventstock.client.poll;
 
-import com.rbkmoney.eventstock.client.*;
+import com.rbkmoney.eventstock.client.EventPublisher;
+import com.rbkmoney.eventstock.client.SubscriberConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-/**
- * Created by vpankrashkin on 28.06.16.
- */
 class PollingEventPublisher<TEvent> implements EventPublisher<TEvent> {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 

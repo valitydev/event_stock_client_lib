@@ -7,9 +7,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Created by vpankrashkin on 07.06.17.
- */
 public class Housekeeper<T extends Object> implements HandlerListener<T> {
     private static final Logger log = LoggerFactory.getLogger(Housekeeper.class);
 

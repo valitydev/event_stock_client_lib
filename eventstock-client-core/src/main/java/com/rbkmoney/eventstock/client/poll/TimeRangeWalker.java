@@ -5,9 +5,6 @@ import com.rbkmoney.eventstock.client.EventRange;
 
 import java.time.Instant;
 
-/**
- * Created by vpankrashkin on 12.07.16.
- */
 class TimeRangeWalker extends AbstractRangeWalker<Instant> {
 
     public TimeRangeWalker(EventRange<Instant> range) {

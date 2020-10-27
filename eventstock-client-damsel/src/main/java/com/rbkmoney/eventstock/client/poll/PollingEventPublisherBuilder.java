@@ -7,9 +7,6 @@ import com.rbkmoney.woody.thrift.impl.http.THSpawnClientBuilder;
 import java.net.URI;
 import java.util.Objects;
 
-/**
- * Created by vpankrashkin on 29.06.16.
- */
 public class PollingEventPublisherBuilder extends DefaultPollingEventPublisherBuilder {
     private static final int DEFAULT_HOUSEKEEPER_TIMEOUT = 1000;
 

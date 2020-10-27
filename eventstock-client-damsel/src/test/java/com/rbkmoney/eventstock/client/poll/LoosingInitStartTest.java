@@ -2,9 +2,11 @@ package com.rbkmoney.eventstock.client.poll;
 
 import com.rbkmoney.damsel.base.InvalidRequest;
 import com.rbkmoney.damsel.event_stock.*;
-import com.rbkmoney.damsel.event_stock.EventConstraint;
 import com.rbkmoney.damsel.payment_processing.NoLastEvent;
-import com.rbkmoney.eventstock.client.*;
+import com.rbkmoney.eventstock.client.DefaultSubscriberConfig;
+import com.rbkmoney.eventstock.client.EventAction;
+import com.rbkmoney.eventstock.client.EventFilter;
+import com.rbkmoney.eventstock.client.EventHandler;
 import com.rbkmoney.woody.api.event.ServiceEvent;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.event.ServiceEventType;
@@ -25,9 +27,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-/**
- * Created by vpankrashkin on 21.04.17.
- */
 public class LoosingInitStartTest extends AbstractTest {
     final Long initEventId = 0L;
     final int skipEvents = 2;
@@ -42,7 +41,7 @@ public class LoosingInitStartTest extends AbstractTest {
         public List<StockEvent> getEvents(EventConstraint constraint) throws InvalidRequest, DatasetTooBig, TException {
             log.info("Client: Get Events: {}", constraint);
             currIndex.set(constraint.getEventRange().getIdRange().getFromId().isSetInclusive() ?
-                            constraint.getEventRange().getIdRange().getFromId().getInclusive() :
+                    constraint.getEventRange().getIdRange().getFromId().getInclusive() :
                     constraint.getEventRange().getIdRange().getFromId().getExclusive() + 1
             );
             if (currIndex.get() > expectedMax) {
@@ -78,12 +77,12 @@ public class LoosingInitStartTest extends AbstractTest {
                     new com.rbkmoney.eventstock.client.EventConstraint.EventIDRange() {
                         {
                             setFromInclusive(initEventId);
-                            setToInclusive((long)expectedMax);
+                            setToInclusive((long) expectedMax);
                         }
                     });
             events = createEvents(ESServiceAdapter.convertConstraint(constraint, expectedMax), expectedMax);
 
-            StockEvent event = events.get((int)currIndex.addAndGet(getFirst ? 0 : skipEvents));
+            StockEvent event = events.get((int) currIndex.addAndGet(getFirst ? 0 : skipEvents));
             return event;
         }
 
@@ -98,7 +97,7 @@ public class LoosingInitStartTest extends AbstractTest {
         addServlet(new THServiceBuilder().withEventListener(
                 (ServiceEventListener<ServiceEvent>) serviceEvent -> {
                     if (serviceEvent.getEventType() == ServiceEventType.ERROR) {
-                        log.info("Call err {}", (Throwable)serviceEvent.getActiveSpan().getMetadata().getValue(MetadataProperties.CALL_ERROR));
+                        log.info("Call err {}", (Throwable) serviceEvent.getActiveSpan().getMetadata().getValue(MetadataProperties.CALL_ERROR));
                     }
                 }
         ).build(EventRepositorySrv.Iface.class, ers), "/test");
@@ -127,7 +126,7 @@ public class LoosingInitStartTest extends AbstractTest {
 
         PollingEventPublisher<StockEvent> eventPublisher = eventPublisherBuilder.build();
 
-        EventFilter filter = createEventFilter(initEventId, (long)expectedMax, false);
+        EventFilter filter = createEventFilter(initEventId, (long) expectedMax, false);
         filter.getEventConstraint().getIdRange().setFromNow();
         eventPublisher.subscribe(new DefaultSubscriberConfig<>(filter));
         latch.await();

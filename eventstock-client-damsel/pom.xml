@@ -7,10 +7,9 @@
     <parent>
         <groupId>com.rbkmoney</groupId>
         <artifactId>eventstock-client</artifactId>
-        <version>1.2.10</version>
+        <version>1.2.11</version>
     </parent>
 
-    <groupId>com.rbkmoney</groupId>
     <artifactId>eventstock-client-damsel</artifactId>
     <packaging>jar</packaging>
 
@@ -22,7 +21,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>damsel</artifactId>
-            <version>1.411-c31db04</version>
+            <version>1.452-efca058</version>
             <scope>provided</scope>
         </dependency>
         <!--Test-->
@@ -39,7 +38,6 @@
         <dependency>
             <groupId>com.rbkmoney.geck</groupId>
             <artifactId>serializer</artifactId>
-            <version>${geck.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

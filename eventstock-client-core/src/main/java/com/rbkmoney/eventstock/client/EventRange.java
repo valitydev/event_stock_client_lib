@@ -1,10 +1,7 @@
 package com.rbkmoney.eventstock.client;
 
 /**
- * Created by vpankrashkin on 07.07.16.
- *
  * Represents range of values. Range is forward oriented and doesn't support rewinding.
- *
  */
 public class EventRange<T extends Comparable> {
     private T from;
@@ -29,7 +26,7 @@ public class EventRange<T extends Comparable> {
     /**
      * Set the down bound value.
      * If value is null, range is down-bounded with first existing event.
-     * */
+     */
     public void setFrom(T val, boolean inclusive) {
         this.from = val;
         this.fromInclusiveFlag = inclusive;
@@ -38,7 +35,7 @@ public class EventRange<T extends Comparable> {
 
     /**
      * Set the down bound to last existing event, if no such event found, it'll be waited for.
-     * */
+     */
     public void setFromNow() {
         setFrom(null, true);
         this.fromNowFlag = true;
@@ -55,7 +52,7 @@ public class EventRange<T extends Comparable> {
     /**
      * Set the up bound value.
      * If value is null, range is not up-bounded.
-     * */
+     */
     public void setTo(T val, boolean inclusive) {
         this.to = val;
         this.toInclusiveFlag = inclusive;
@@ -109,7 +106,7 @@ public class EventRange<T extends Comparable> {
 
     /**
      * @return true - if range has both up and down ranges; false - otherwise.
-     * */
+     */
     public boolean isDefined() {
         return isFromDefined() && isToDefined();
     }

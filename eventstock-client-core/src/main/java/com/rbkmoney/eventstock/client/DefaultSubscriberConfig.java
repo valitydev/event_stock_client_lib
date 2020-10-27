@@ -1,8 +1,5 @@
 package com.rbkmoney.eventstock.client;
 
-/**
- * Created by vpankrashkin on 11.07.16.
- */
 public class DefaultSubscriberConfig<TEvent> implements SubscriberConfig<TEvent> {
     private final EventFilter<TEvent> filter;
     private final EventHandler<TEvent> handler;

@@ -12,9 +12,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
-/**
- * Created by vpankrashkin on 07.06.17.
- */
 public class EventActionTest {
     final int eventRetryDelay = 1200;
     PollingEventPublisher<SinkEvent> publisher;

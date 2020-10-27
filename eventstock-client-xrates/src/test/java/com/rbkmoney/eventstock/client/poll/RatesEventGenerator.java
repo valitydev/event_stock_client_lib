@@ -11,6 +11,7 @@ import com.rbkmoney.xrates.rate.*;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class RatesEventGenerator {
 
@@ -21,12 +22,12 @@ public class RatesEventGenerator {
         sinkEvent.setCreatedAt(timeString);
         sinkEvent.setPayload(
                 new Event(
-                        Arrays.asList(
+                        Collections.singletonList(
                                 Change.created(
                                         new ExchangeRateCreated(
                                                 new ExchangeRateData(
                                                         new TimestampInterval("1", "2"),
-                                                        Arrays.asList(
+                                                        Collections.singletonList(
                                                                 new Quote(
                                                                         new Currency("1", (short) 2),
                                                                         new Currency("1", (short) 2),

@@ -16,9 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Created by vpankrashkin on 29.06.16.
- */
 public class PPServiceAdapter implements ServiceAdapter<StockEvent, com.rbkmoney.eventstock.client.EventConstraint> {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final EventSinkSrv.Iface repository;
@@ -113,14 +110,14 @@ public class PPServiceAdapter implements ServiceAdapter<StockEvent, com.rbkmoney
         } else if (scrConstraint.getTimeRange() != null) {
             throw new UnsupportedByServiceException("Time range is not supported by PP interface");
         }
-        throw new UnsupportedByServiceException("Unexpected constraint range type: "+scrConstraint);
+        throw new UnsupportedByServiceException("Unexpected constraint range type: " + scrConstraint);
     }
 
     private static EventRange convertRange(com.rbkmoney.eventstock.client.EventConstraint.EventIDRange srcIdRange) throws UnsupportedByServiceException {
         EventRange resIdRange = new EventRange();
 
         if (srcIdRange.isFromDefined()) {
-            if(srcIdRange.isFromInclusive()) {
+            if (srcIdRange.isFromInclusive()) {
                 if (srcIdRange.getFrom() > Long.MIN_VALUE) {
                     resIdRange.setAfter(srcIdRange.getFrom() - 1);//Based on Andrew confirmation that mg doesn't conform to api (no exception thrown on unknown event). Otherwise it's not possible to get specific event by id if preceding gap exists
                 }

@@ -9,26 +9,26 @@ import java.time.temporal.TemporalAccessor;
 
 public class WithdrawalSessionEventFilter implements EventFilter<SinkEvent> {
 
-	@Override
-	public EventConstraint getEventConstraint() {
-		EventConstraint.EventIDRange range = new EventConstraint.EventIDRange();
-		range.setFromNow();
-		return new EventConstraint(range);
-	}
+    @Override
+    public EventConstraint getEventConstraint() {
+        EventConstraint.EventIDRange range = new EventConstraint.EventIDRange();
+        range.setFromNow();
+        return new EventConstraint(range);
+    }
 
-	@Override
-	public Filter getFilter() {
-		return null;
-	}
+    @Override
+    public Filter getFilter() {
+        return null;
+    }
 
-	@Override
-	public int getLimit() {
-		return 1;
-	}
+    @Override
+    public int getLimit() {
+        return 1;
+    }
 
-	@Override
-	public boolean accept(Long eventId, TemporalAccessor createdAt, SinkEvent o) {
-		return true;
-	}
+    @Override
+    public boolean accept(Long eventId, TemporalAccessor createdAt, SinkEvent o) {
+        return true;
+    }
 
 }

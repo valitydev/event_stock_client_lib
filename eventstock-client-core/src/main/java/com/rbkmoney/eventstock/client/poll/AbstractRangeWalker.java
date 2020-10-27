@@ -6,10 +6,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-/**
- * Created by vpankrashkin on 12.07.16.
- */
-abstract  class AbstractRangeWalker<T extends Comparable> implements RangeWalker<T, EventRange<T>> {
+abstract class AbstractRangeWalker<T extends Comparable> implements RangeWalker<T, EventRange<T>> {
     private final EventRange<T> range;
     private EventRange<T> walkingRange;
 

@@ -2,9 +2,6 @@ package com.rbkmoney.eventstock.client;
 
 import java.time.Instant;
 
-/**
- * Created by vpankrashkin on 07.07.16.
- */
 public class EventConstraint {
     private final EventIDRange idRange;
     private final EventTimeRange timeRange;

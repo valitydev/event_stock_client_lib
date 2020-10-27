@@ -7,9 +7,6 @@ import com.rbkmoney.geck.filter.Filter;
 import java.time.Instant;
 import java.time.temporal.TemporalAccessor;
 
-/**
- * Created by vpankrashkin on 28.06.16.
- */
 public class EventFlowFilter<TEvent> implements EventFilter<TEvent> {
     private final EventConstraint eventConstraint;
     private final Filter filter;

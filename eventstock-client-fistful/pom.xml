@@ -7,10 +7,9 @@
     <parent>
         <groupId>com.rbkmoney</groupId>
         <artifactId>eventstock-client</artifactId>
-        <version>1.2.10</version>
+        <version>1.2.11</version>
     </parent>
 
-    <groupId>com.rbkmoney</groupId>
     <artifactId>eventstock-client-fistful</artifactId>
     <packaging>jar</packaging>
 
@@ -22,7 +21,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>fistful-proto</artifactId>
-            <version>1.8-37ccefb</version>
+            <version>1.107-d9237db</version>
             <scope>provided</scope>
         </dependency>
         <!--Test-->
@@ -39,7 +38,6 @@
         <dependency>
             <groupId>com.rbkmoney.geck</groupId>
             <artifactId>serializer</artifactId>
-            <version>${geck.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

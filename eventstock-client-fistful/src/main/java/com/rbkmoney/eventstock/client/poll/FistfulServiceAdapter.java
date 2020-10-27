@@ -23,8 +23,8 @@ public class FistfulServiceAdapter<TEvent> implements ServiceAdapter<TEvent, Eve
     }
 
     public static FistfulServiceAdapter<com.rbkmoney.fistful.withdrawal.SinkEvent> buildWithdrawalAdapter(ClientBuilder clientBuilder) {
-		return new FistfulServiceAdapter<>(new WithdrawalFistfulRepository(clientBuilder));
-	}
+        return new FistfulServiceAdapter<>(new WithdrawalFistfulRepository(clientBuilder));
+    }
 
     public static FistfulServiceAdapter<com.rbkmoney.fistful.identity.SinkEvent> buildIdentityAdapter(ClientBuilder clientBuilder) {
         return new FistfulServiceAdapter<>(new IdentityFistfulRepository(clientBuilder));
